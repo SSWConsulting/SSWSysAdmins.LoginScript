@@ -1,0 +1,1 @@
+these files are copied on the logon script as per rule http://www.ssw.com.au/ssw/Standards/Rules/RulesToBetterNetworks.aspx#companywordtemplate
