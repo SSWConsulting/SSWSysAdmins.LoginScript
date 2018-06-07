@@ -33,7 +33,7 @@ if ($username -eq '') {
 }
 
 #This line sets the variable with the current GitHub project with all our Templates.
-Set-Variable -Name 'ScriptTemplateSource' -Value 'https://github.com/SSWConsulting/testLogin/raw/master/'
+Set-Variable -Name 'ScriptTemplateSource' -Value 'https://github.com/SSWConsulting/LoginScript/raw/master/'
 Set-Variable -Name 'ScriptLogFile' -Value 'C:\SSWTemplateScript_LastRun.log'
 
 $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
@@ -46,7 +46,7 @@ If ($currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administ
 Set-Content -Path $ScriptLogFile -Value 'SSWTemplateScript log' -Force
 Write-Host 'All actions performed by this script are written to the log file at ' $ScriptLogFile 
 
-Add-Content -Path $ScriptLogFile -Value 'Username being used is:' -NoNewline
+Add-Content -Path $ScriptLogFile -Value 'Username being used is: ' -NoNewline
 Add-Content -Path $ScriptLogFile -Value  $($username.ToString())
 Add-Content -Path $ScriptLogFile -Value 'Last run: ' -NoNewline
 Add-Content -Path $ScriptLogFile -Value  $((Get-Date).ToString())
