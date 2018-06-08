@@ -3,11 +3,29 @@
  #  Version     Author          Date            Comment  
  #  1.0         Greg Harris     12/03/2018      Initial Version - Based on SSWLoginScript.bat
  #  1.1         Kaique Biancatti07/06/2018      Added the correct link to GitHub and added TLS options to connect to HTTPS. Also added name prompt.
+ #  1.2         Kaique Biancatti08/06/2018      Added self elevation of PowerShell script, comments, backup logic, and reorganizing of code.
  #>
 
 param (    
     [string]$username = ''
 )
+
+$currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
+
+If ($currentPrincipal.IsInRole([Security.Prsincipal.WindowsBuiltInRole]::Administrator) -eq $False) {
+    #Write-Host 'Script actions not performed. This script MUST be run as an Administrator.' -ForegroundColor Red
+    #exit
+#}
+    # Relaunch as an elevated process:
+    Start-Process powershell.exe "-File",('"{0}"' -f $MyInvocation.MyCommand.Path) -Verb RunAs
+    exit
+}
+
+#This line sets the variable with the current GitHub project with all our Templates, and creates our LogFile.
+Set-Variable -Name 'ScriptTemplateSource' -Value 'https://github.com/SSWConsulting/LoginScript/raw/master/'
+Set-Variable -Name 'ScriptLogFile' -Value 'C:\SSWTemplateScript_LastRun.log'
+
+Set-Content -Path $ScriptLogFile -Value 'SSWTemplateScript log' -Force
 
 Write-Host 'This PowerShell script copies SSW Template Files from ' $ScriptTemplateSource ' to your %AppData%\Microsoft\Templates\ folder'
 Write-Host 'Please make sure that Word, Powerpoint and Outlook are closed. Open templates will not be replaced'
@@ -15,35 +33,26 @@ Write-Host 'Please make sure that Word, Powerpoint and Outlook are closed. Open 
 #This sets the security protocol to use all TLS versions. Without this, Powershell will use TLS1.0 which GitHub does not accept.
 [Net.ServicePointManager]::SecurityProtocol =  "tls12, tls11, tls"
 
+# This bit tries to find if the user is running on a domain account.
 $domain = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name.Split('\')[0]
 if ($domain -eq 'SSW2000') {
     if($username -eq '') {
     $username = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name.Split('\')[1]
     }
+    Add-Content -Path $ScriptLogFile -Value 'Domain username found'
 }
 
 if ($username -eq '') {
-    Write-Host 'Username parameter required if not run on a SSW2000 domain account' -ForegroundColor Red
+    Write-Host 'Username parameter required if not run on a SSW2000 domain account. Please input username on the pop-up box.' -ForegroundColor Red
 
 	#Calling a VB Prompt for the user if there is no username set    
 	[void][System.Reflection.Assembly]::LoadWithPartialName('Microsoft.VisualBasic')
-	$username = [Microsoft.VisualBasic.Interaction]::InputBox("Enter your username with correct capitals and no domain - Eg. AdamCogan and not SSW2000\adamcogan", "Username without SSW2000 or @ssw.com.au", "$env:username")
-
-	'Username being used is $username'
+	$username = [Microsoft.VisualBasic.Interaction]::InputBox("Enter your username with correct capitals and no domain - Eg. AdamCogan and not SSW2000\adamcogan or adamcogan@ssw.com.au", "Please input your SSW username:", "$env:username")
+    
+    Add-Content -Path $ScriptLogFile -Value 'Domain username not found'
+	'Username being used is'+$username
 }
 
-#This line sets the variable with the current GitHub project with all our Templates.
-Set-Variable -Name 'ScriptTemplateSource' -Value 'https://github.com/SSWConsulting/LoginScript/raw/master/'
-Set-Variable -Name 'ScriptLogFile' -Value 'C:\SSWTemplateScript_LastRun.log'
-
-$currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
-
-If ($currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator) -eq $False) {
-    Write-Host 'Script actions not performed. This script MUST be run as an Administrator.' -ForegroundColor Red
-    exit
-}
-
-Set-Content -Path $ScriptLogFile -Value 'SSWTemplateScript log' -Force
 Write-Host 'All actions performed by this script are written to the log file at ' $ScriptLogFile 
 
 Add-Content -Path $ScriptLogFile -Value 'Username being used is: ' -NoNewline
@@ -51,7 +60,7 @@ Add-Content -Path $ScriptLogFile -Value  $($username.ToString())
 Add-Content -Path $ScriptLogFile -Value 'Last run: ' -NoNewline
 Add-Content -Path $ScriptLogFile -Value  $((Get-Date).ToString())
 
-Add-Content -Path $ScriptLogFile -Value '### Office Templates'
+Add-Content -Path $ScriptLogFile -Value '========= OFFICE TEMPLATES ========='
 
 $ScriptFileSource = $ScriptTemplateSource + '/Templates/Normal.dot'
 $ScriptFileDestination = $env:APPDATA + '\Microsoft\Templates\Normal.dot'
@@ -145,7 +154,7 @@ catch {
     Add-Content -Path $ScriptLogFile -Value 'NormalEmail.dotm copy failed'
 }
 
-Add-Content -Path $ScriptLogFile -Value '### Outlook Signature'
+Add-Content -Path $ScriptLogFile -Value '========= OUTLOOK SIGNATURE ========='
 
 $SignatureDestination  = $env:APPDATA + '\Microsoft\Signatures\'
 New-Item -ItemType Directory -Force -Path $SignatureDestination  | Out-Null 
@@ -153,6 +162,15 @@ New-Item -ItemType Directory -Force -Path $SignatureDestination  | Out-Null
 $ScriptFileSource = $ScriptTemplateSource + '/Templates/Outlook/SSW_' + $username + '_Short_Default.htm'
 $ScriptFileDestination = $env:APPDATA + '\Microsoft\Signatures\SSW.htm'
 
+try {
+    if (Test-Path $ScriptFileDestination) {
+        Copy-Item $ScriptFileDestination -Destination ($ScriptFileDestination).Replace("SSW.htm","zzSSW.htm")
+        Add-Content -Path $ScriptLogFile -Value 'Already found SSW.htm. Renaming it to zzSSW.htm'
+    }
+}
+catch {
+    Add-Content -Path $ScriptLogFile -Value 'SSW.htm rename failed'
+}
 try {
     Invoke-WebRequest -Uri $ScriptFileSource -OutFile $ScriptFileDestination 
     Add-Content -Path $ScriptLogFile -Value 'SSW.htm copied'
@@ -208,7 +226,7 @@ catch {
     Add-Content -Path $ScriptLogFile -Value 'themedata.thmx copy failed'
 }
 
-Add-Content -Path $ScriptLogFile -Value '### Snagit Theme'
+Add-Content -Path $ScriptLogFile -Value '========= SNAGIT THEME ========='
 
 Stop-Process -name 'Snagit32', 'SnagitEditor', 'SnagitPriv'  -ErrorAction 'silentlycontinue'
 
