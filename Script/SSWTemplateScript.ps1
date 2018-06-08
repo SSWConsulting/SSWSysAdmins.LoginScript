@@ -10,6 +10,8 @@ param (
     [string]$username = ''
 )
 
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Unrestricted
+
 $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
 
 If ($currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator) -eq $False) {
