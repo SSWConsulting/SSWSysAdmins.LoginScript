@@ -10,7 +10,7 @@ param (
     [string]$username = ''
 )
 
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Unrestricted
+Set-ExecutionPolicy -ExecutionPolicy Unrestricted
 
 $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
 
