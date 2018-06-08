@@ -12,7 +12,7 @@ param (
 
 $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
 
-If ($currentPrincipal.IsInRole([Security.Prsincipal.WindowsBuiltInRole]::Administrator) -eq $False) {
+If ($currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator) -eq $False) {
     #Write-Host 'Script actions not performed. This script MUST be run as an Administrator.' -ForegroundColor Red
     #exit
 #}
