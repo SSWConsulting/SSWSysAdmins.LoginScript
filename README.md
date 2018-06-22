@@ -10,3 +10,5 @@ How to use it:
 	5. Click 'Ok' to the prompts, if any;
 	6. If you are not logged in as a SSW user, input your username on the pop-up that appears;
 	7. The script should copy everything and close itself when it's done.
+	
+	Note: Some red errors may appear. If you have any problems, ask Kaique at KaiqueBiancatti@ssw.com.au.
