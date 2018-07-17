@@ -5,6 +5,7 @@
  #  1.1         Kaique Biancatti07/06/2018      Added the correct link to GitHub and added TLS options to connect to HTTPS. Also added name prompt.
  #  1.2         Kaique Biancatti08/06/2018      Added self elevation of PowerShell script, comments, backup logic, and reorganizing of code.
  #  1.3	        Kaique Biancatti16/07/2018      Added open notepad with log at the end of script.
+ #  1.4         Kaique Biancatti17/07/2018      Added time sync with Sydney server.
  #>
 
 param (    
@@ -60,6 +61,19 @@ Add-Content -Path $ScriptLogFile -Value 'Username being used is: ' -NoNewline
 Add-Content -Path $ScriptLogFile -Value  $($username.ToString())
 Add-Content -Path $ScriptLogFile -Value 'Last run: ' -NoNewline
 Add-Content -Path $ScriptLogFile -Value  $((Get-Date).ToString())
+
+Add-Content -Path $ScriptLogFile -Value '========= TIME SYNC WITH SYDNEY DOMAIN ========='
+
+#Syncs the time with our domain
+try 
+{
+	net time /domain:sydney.ssw.com.au /set /y 
+	Add-Content -Path $ScriptLogFile -Value 'Sydney time synced'
+}
+catch
+{
+	Add-Content -Path $ScriptLogFile -Value 'Sydney time sync failed'
+}
 
 Add-Content -Path $ScriptLogFile -Value '========= OFFICE TEMPLATES ========='
 
@@ -242,5 +256,6 @@ catch {
     Add-Content -Path $ScriptLogFile -Value 'DrawQuickStyles.xml copy failed'
 }
 
+#Opens up notepad at the end with our completed log
 notepad C:\SSWTemplateScript_LastRun.log
 
