@@ -1,14 +1,15 @@
-<# SSWTemplateScript - 
+<# SSWTemplateScript -
  #
- #  Version     Author          Date            Comment  
+ #  Version     Author          Date            Comment
  #  1.0         Greg Harris     12/03/2018      Initial Version - Based on SSWLoginScript.bat
  #  1.1         Kaique Biancatti07/06/2018      Added the correct link to GitHub and added TLS options to connect to HTTPS. Also added name prompt.
  #  1.2         Kaique Biancatti08/06/2018      Added self elevation of PowerShell script, comments, backup logic, and reorganizing of code.
  #  1.3	        Kaique Biancatti16/07/2018      Added open notepad with log at the end of script.
  #  1.4         Kaique Biancatti17/07/2018      Added time sync with Sydney server.
+ #  1.5         Greg Harris     17/07/2018      Added FlushDNS, check for file share and use if available. If not, use github.
  #>
 
-param (    
+ param (
     [string]$username = ''
 )
 
@@ -23,14 +24,24 @@ If ($currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administ
     exit
 }
 
-#This line sets the variable with the current GitHub project with all our Templates, and creates our LogFile.
-Set-Variable -Name 'ScriptTemplateSource' -Value 'https://github.com/SSWConsulting/LoginScript/raw/master/'
+$ShareExists = Test-Path $('filesystem::\\fileserver\DataSSW\DataSSWEmployees\Templates')
+
+if($ShareExists -eq $true)
+{
+    Set-Variable -Name 'ScriptTemplateSource' -Value 'file://fileserver/DataSSW/DataSSWEmployees'
+}
+else {
+    Set-Variable -Name 'ScriptTemplateSource' -Value 'https://github.com/SSWConsulting/LoginScript/raw/master/'
+}
+
 Set-Variable -Name 'ScriptLogFile' -Value 'C:\SSWTemplateScript_LastRun.log'
 
 Set-Content -Path $ScriptLogFile -Value 'SSWTemplateScript log' -Force
 
 Write-Host 'This PowerShell script copies SSW Template Files from ' $ScriptTemplateSource ' to your %AppData%\Microsoft\Templates\ folder'
 Write-Host 'Please make sure that Word, Powerpoint and Outlook are closed. Open templates will not be replaced'
+
+Clear-DnsClientCache
 
 #This sets the security protocol to use all TLS versions. Without this, Powershell will use TLS1.0 which GitHub does not accept.
 [Net.ServicePointManager]::SecurityProtocol =  "tls12, tls11, tls"
@@ -55,7 +66,7 @@ if ($username -eq '') {
 	'Username being used is'+$username
 }
 
-Write-Host 'All actions performed by this script are written to the log file at ' $ScriptLogFile 
+Write-Host 'All actions performed by this script are written to the log file at ' $ScriptLogFile
 
 Add-Content -Path $ScriptLogFile -Value 'Username being used is: ' -NoNewline
 Add-Content -Path $ScriptLogFile -Value  $($username.ToString())
@@ -74,6 +85,7 @@ catch
 {
 	Add-Content -Path $ScriptLogFile -Value 'Sydney time sync failed'
 }
+
 
 Add-Content -Path $ScriptLogFile -Value '========= OFFICE TEMPLATES ========='
 
