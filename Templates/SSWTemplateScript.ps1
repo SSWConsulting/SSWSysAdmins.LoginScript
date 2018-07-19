@@ -4,6 +4,7 @@
  #  1.0         Greg Harris     12/03/2018      Initial Version - Based on SSWLoginScript.bat
  #  1.1         Kaique Biancatti07/06/2018      Added the correct link to GitHub and added TLS options to connect to HTTPS. Also added name prompt.
  #  1.2         Kaique Biancatti08/06/2018      Added self elevation of PowerShell script, comments, backup logic, and reorganizing of code.
+ #  1.3	        Kaique Biancatti16/07/2018      Added open notepad with log at the end of script.
  #>
 
 param (    
@@ -21,8 +22,18 @@ If ($currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administ
     exit
 }
 
+$ShareExists = Test-Path $('filesystem::\\fileserver\DataSSW\DataSSWEmployees\Templates')
+
+if($ShareExists -eq $true)
+{
+    Set-Variable -Name 'ScriptTemplateSource' -Value 'file://fileserver/DataSSW/DataSSWEmployees'
+}
+else {
+    Set-Variable -Name 'ScriptTemplateSource' -Value 'https://github.com/SSWConsulting/LoginScript/raw/master/'
+}
+Clear-DnsClientCache
+
 #This line sets the variable with the current GitHub project with all our Templates, and creates our LogFile.
-Set-Variable -Name 'ScriptTemplateSource' -Value 'https://github.com/SSWConsulting/LoginScript/raw/master/'
 Set-Variable -Name 'ScriptLogFile' -Value 'C:\SSWTemplateScript_LastRun.log'
 
 Set-Content -Path $ScriptLogFile -Value 'SSWTemplateScript log' -Force
@@ -240,3 +251,6 @@ try {
 catch {
     Add-Content -Path $ScriptLogFile -Value 'DrawQuickStyles.xml copy failed'
 }
+
+notepad C:\SSWTemplateScript_LastRun.log
+
