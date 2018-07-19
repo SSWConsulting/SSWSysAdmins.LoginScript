@@ -3,7 +3,7 @@ This login script pulls default Office and SnagIt templates from GitHub into emp
 
 How to use it:
 
-	1. Please use the link https://cdn.rawgit.com/SSWConsulting/LoginScript/6ba27599/Script/LoginScript.zip to download the file;
+	1. Please use the link https://cdn.rawgit.com/SSWConsulting/LoginScript/c003ba15/Script/LoginScript.zip to download the file;
 	2. Close any Office applications open (or else the templates will not be copied);
 	3. Extract both files to anywhere in your system;
 	4. Right click on 'Launch.bat' | Run as Administrator;
