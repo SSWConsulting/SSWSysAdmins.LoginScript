@@ -270,7 +270,7 @@ catch {
 }
 
 #This bit will create a function to write a log in our fileserver
-$Logfile = "\\flea\DataSSW\DataSSWEmployees\LoginSriptUserLogs.log"
+$Logfile = "\\flea\DataSSW\DataSSWEmployees\LoginScriptUserLogs.log"
 
 Function LogWrite
 {
