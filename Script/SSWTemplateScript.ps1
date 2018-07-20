@@ -7,6 +7,7 @@
  #  1.3	        Kaique Biancatti16/07/2018      Added open notepad with log at the end of script.
  #  1.4         Kaique Biancatti17/07/2018      Added time sync with Sydney server.
  #  1.5         Greg Harris     17/07/2018      Added FlushDNS, check for file share and use if available. If not, use github.
+ #  1.6         Kaique Biancatti20/07/2018      Added LogWrite function to write logs in our fileserver for debugging.
  #>
 
  param (
@@ -267,6 +268,22 @@ try {
 catch {
     Add-Content -Path $ScriptLogFile -Value 'DrawQuickStyles.xml copy failed'
 }
+
+#This bit will create a function to write a log in our fileserver
+$Logfile = "\\flea\DataSSW\DataSSWEmployees\LoginSriptUserLogs.log"
+
+Function LogWrite
+{
+   $username = $env:USERNAME
+   
+   $PcName = $env:computername
+
+   $Stamp = (Get-Date).toString("dd/MM/yyyy HH:mm:ss")
+   $Line = "$Stamp $PcName $Username"
+
+   Add-content $Logfile -value $Line
+}
+LogWrite
 
 #Opens up notepad at the end with our completed log
 notepad C:\SSWTemplateScript_LastRun.log
