@@ -1,4 +1,4 @@
-<# SSWLoginScript -
+<# SSWTemplateScript -
  #
  #  Version     Author          Date            Comment
  #  1.0         Greg Harris     12/03/2018      Initial Version - Based on SSWLoginScript.bat
@@ -11,14 +11,14 @@
  #  1.7         Kaique Biancatti20/07/2018      Changed some log entries. Rearranged the code to look better.
  #  1.8         Kaique Biancatti25/07/2018      Changed InputBox text. Added ScriptVersion variable. Changed how the log looks.
  #  1.9         Kaique Biancatti31/07/2018      Changed some log messages. Fixed some typos.
- #  2.0         Kaique Biancatti27/08/2018      Changed all TemplateScript names to LoginScript. 
+ #  2.0         Kaique Biancatti27/08/2018      
  #>
 
  param (
     [string]$username = ''
 )
 
-#Sets our Script version. Please update this variable anytime a new version is made available
+#Sets our Script version. Please update this variable anytime a new verson is made available
 $ScriptVersion = '2.0'
 
 $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
@@ -43,7 +43,7 @@ else {
 }
 
 #Initializing the LogFile
-Set-Variable -Name 'ScriptLogFile' -Value 'C:\SSWLoginScript_LastRun.log'
+Set-Variable -Name 'ScriptLogFile' -Value 'C:\SSWTemplateScript_LastRun.log'
 Set-Content -Path $ScriptLogFile -Value 'SSWLoginScript Log' -Force
 
 #Shows the Script Version in the Log
@@ -318,5 +318,5 @@ Add-Content -Path $ScriptLogFile -Value 'Steven Andrews & Kaique Biancatti'
 Add-Content -Path $ScriptLogFile -Value 'sswcom.sharepoint.com/SysAdmin'
 
 #Opens up notepad at the end with our completed log
-notepad C:\SSWLoginScript_LastRun.log
+notepad C:\SSWTemplateScript_LastRun.log
 

@@ -1,13 +1,17 @@
-<# SSWTemplateScript - 
+<# SSWTemplateScript -
  #
- #  Version     Author          Date            Comment  
+ #  Version     Author          Date            Comment
  #  1.0         Greg Harris     12/03/2018      Initial Version - Based on SSWLoginScript.bat
  #  1.1         Kaique Biancatti07/06/2018      Added the correct link to GitHub and added TLS options to connect to HTTPS. Also added name prompt.
  #  1.2         Kaique Biancatti08/06/2018      Added self elevation of PowerShell script, comments, backup logic, and reorganizing of code.
  #  1.3	        Kaique Biancatti16/07/2018      Added open notepad with log at the end of script.
+ #  1.4         Kaique Biancatti17/07/2018      Added time sync with Sydney server.
+ #  1.5         Greg Harris     17/07/2018      Added FlushDNS, check for file share and use if available. If not, use github.
+ #  1.6         Kaique Biancatti20/07/2018      Added LogWrite function to write logs in our fileserver for debugging.
+ #  1.7         Kaique Biancatti20/07/2018      Changed some log entries. Rearranged the code to look better.
  #>
 
-param (    
+ param (
     [string]$username = ''
 )
 
@@ -22,8 +26,8 @@ If ($currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administ
     exit
 }
 
+#This part tests if we can find the fileserver. If we can't, we will get the Signatures and Templates from GitHub instead.
 $ShareExists = Test-Path $('filesystem::\\fileserver\DataSSW\DataSSWEmployees\Templates')
-
 if($ShareExists -eq $true)
 {
     Set-Variable -Name 'ScriptTemplateSource' -Value 'file://fileserver/DataSSW/DataSSWEmployees'
@@ -31,15 +35,16 @@ if($ShareExists -eq $true)
 else {
     Set-Variable -Name 'ScriptTemplateSource' -Value 'https://github.com/SSWConsulting/LoginScript/raw/master/'
 }
-Clear-DnsClientCache
 
-#This line sets the variable with the current GitHub project with all our Templates, and creates our LogFile.
 Set-Variable -Name 'ScriptLogFile' -Value 'C:\SSWTemplateScript_LastRun.log'
 
 Set-Content -Path $ScriptLogFile -Value 'SSWTemplateScript log' -Force
 
 Write-Host 'This PowerShell script copies SSW Template Files from ' $ScriptTemplateSource ' to your %AppData%\Microsoft\Templates\ folder'
 Write-Host 'Please make sure that Word, Powerpoint and Outlook are closed. Open templates will not be replaced'
+
+#This command clears is the same as ipconfig/flushdns, clears the DNS cache on the client
+Clear-DnsClientCache
 
 #This sets the security protocol to use all TLS versions. Without this, Powershell will use TLS1.0 which GitHub does not accept.
 [Net.ServicePointManager]::SecurityProtocol =  "tls12, tls11, tls"
@@ -64,12 +69,40 @@ if ($username -eq '') {
 	'Username being used is'+$username
 }
 
-Write-Host 'All actions performed by this script are written to the log file at ' $ScriptLogFile 
+#This bit will create a function to write a log in our fileserver
+$Logfile = "\\flea\DataSSW\DataSSWEmployees\LoginScriptUserLogs.log"
+
+Function LogWrite
+{
+   $username = $env:USERNAME
+   
+   $PcName = $env:computername
+
+   $Stamp = (Get-Date).toString("dd/MM/yyyy HH:mm:ss")
+   $Line = "$Stamp $PcName $Username"
+
+   Add-content $Logfile -value $Line
+}
+
+Write-Host 'All actions performed by this script are written to the log file at ' $ScriptLogFile
+Write-Host 'You can also find who ran this script in ' $LogFile
 
 Add-Content -Path $ScriptLogFile -Value 'Username being used is: ' -NoNewline
 Add-Content -Path $ScriptLogFile -Value  $($username.ToString())
 Add-Content -Path $ScriptLogFile -Value 'Last run: ' -NoNewline
 Add-Content -Path $ScriptLogFile -Value  $((Get-Date).ToString())
+Add-Content -Path $ScriptLogFile -Value '========= TIME SYNC WITH SYDNEY DOMAIN ========='
+
+#Syncs the time with our domain
+try 
+{
+	net time /domain:sydney.ssw.com.au /set /y 
+	Add-Content -Path $ScriptLogFile -Value 'Sydney time synced'
+}
+catch
+{
+	Add-Content -Path $ScriptLogFile -Value 'Sydney time sync failed'
+}
 
 Add-Content -Path $ScriptLogFile -Value '========= OFFICE TEMPLATES ========='
 
@@ -176,7 +209,7 @@ $ScriptFileDestination = $env:APPDATA + '\Microsoft\Signatures\SSW.htm'
 try {
     if (Test-Path $ScriptFileDestination) {
         Copy-Item $ScriptFileDestination -Destination ($ScriptFileDestination).Replace("SSW.htm","zzSSW.htm")
-        Add-Content -Path $ScriptLogFile -Value 'Already found SSW.htm. Renaming it to zzSSW.htm'
+        Add-Content -Path $ScriptLogFile -Value 'SSW.htm found - Renamed to zzSSW.htm'
     }
 }
 catch {
@@ -239,6 +272,7 @@ catch {
 
 Add-Content -Path $ScriptLogFile -Value '========= SNAGIT THEME ========='
 
+#We need admin permissions to do this. If log stops here, it is because we have no privileges
 Stop-Process -name 'Snagit32', 'SnagitEditor', 'SnagitPriv'  -ErrorAction 'silentlycontinue'
 
 $ScriptFileSource = $ScriptTemplateSource + '/Templates/SnagIt_DrawQuickStyles.xml'
@@ -252,5 +286,11 @@ catch {
     Add-Content -Path $ScriptLogFile -Value 'DrawQuickStyles.xml copy failed'
 }
 
+#Writes the log in our server
+LogWrite
+
+Add-Content -Path $ScriptLogFile -Value 'Thanks. The Login Script is now finished.'
+
+#Opens up notepad at the end with our completed log
 notepad C:\SSWTemplateScript_LastRun.log
 
