@@ -14,6 +14,7 @@
  #  2.0         Kaique Biancatti27/08/2018      Changed all TemplateScript names to LoginScript. 
  #  2.1         Kaique Biancatti13/09/2018      Changed InputBox description. Changed LogFile structure.
  #  2.2         Kaique Biancatti12/06/2019      Changed Fail Messages in Log explaining what might be the reason. Changed script name to SSWLoginScript. Added ".sydney.ssw.com.au" to fileserver path.
+ #  2.3         Alex Breskin    28/08/2019      Added logging conditions for directories that may not exist
  #  DO NOT FORGET TO UPDATE THE SCRIPTVERSION VARIABLE BELOW
  #>
 
@@ -22,7 +23,7 @@
 )
 
 #Sets our Script version. Please update this variable anytime a new version is made available
-$ScriptVersion = '2.2'
+$ScriptVersion = '2.3'
 
 $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
 
@@ -201,6 +202,9 @@ try {
     Invoke-WebRequest -Uri $ScriptFileSource -OutFile $ScriptFileDestination 
     Add-Content -Path $ScriptLogFile -Value '   NormalEmail.dotm Copy                      [Done]'
 }
+catch [System.IO.DirectoryNotFoundException] {
+    Add-Content -Path $ScriptLogFile -Value '   NormalEmail.dotm Copy(Path Not Found)      [Failed]'
+}
 catch {
     Add-Content -Path $ScriptLogFile -Value '   NormalEmail.dotm Copy(Outlook Open)        [Failed]'
 }
@@ -211,6 +215,9 @@ $ScriptFileDestination = $env:APPDATA + '\Microsoft\QuickStyles\NormalEmail.dotm
 try {
     Invoke-WebRequest -Uri $ScriptFileSource -OutFile $ScriptFileDestination 
     Add-Content -Path $ScriptLogFile -Value '   NormalEmail.dotm Copy                      [Done]'
+}
+catch [System.IO.DirectoryNotFoundException]  {
+    Add-Content -Path $ScriptLogFile -Value '   NormalEmail.dotm Copy(Path Not Found)      [Failed]'
 }
 catch {
     Add-Content -Path $ScriptLogFile -Value '   NormalEmail.dotm Copy(Outlook Open)        [Failed]'
