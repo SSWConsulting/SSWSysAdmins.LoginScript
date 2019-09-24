@@ -15,6 +15,7 @@
  #  2.1         Kaique Biancatti13/09/2018      Changed InputBox description. Changed LogFile structure.
  #  2.2         Kaique Biancatti12/06/2019      Changed Fail Messages in Log explaining what might be the reason. Changed script name to SSWLoginScript. Added ".sydney.ssw.com.au" to fileserver path.
  #  2.3         Alex Breskin    28/08/2019      Added logging conditions for directories that may not exist
+ #  2.4         Kaique Biancatti24/09/2019      Added SSW background for domain-joined computers
  #  DO NOT FORGET TO UPDATE THE SCRIPTVERSION VARIABLE BELOW
  #>
 
@@ -23,7 +24,7 @@
 )
 
 #Sets our Script version. Please update this variable anytime a new version is made available
-$ScriptVersion = '2.3'
+$ScriptVersion = '2.4'
 
 $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
 
@@ -63,7 +64,7 @@ Clear-DnsClientCache
 #This sets the security protocol to use all TLS versions. Without this, Powershell will use TLS1.0 which GitHub does not accept.
 [Net.ServicePointManager]::SecurityProtocol =  "tls12, tls11, tls"
 
-# This bit tries to find if the user is running on a domain account.
+#This bit tries to find if the user is running on a domain account.
 $domain = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name.Split('\')[0]
 if ($domain -eq 'SSW2000') {
     if($username -eq '') {
@@ -87,8 +88,7 @@ $Logfile = "\\flea\DataSSW\DataSSWEmployees\LoginScriptUserLogs.log"
 
 Function LogWrite
 {
-   $username = $env:USERNAME
-   
+   $username = $env:USERNAME   
    $PcName = $env:computername
 
    $Stamp = (Get-Date).toString("dd/MM/yyyy HH:mm:ss")
@@ -307,6 +307,27 @@ catch {
     Add-Content -Path $ScriptLogFile -Value '   DrawQuickStyles.xml Copy(SnagIt Open)      [Failed]'
 }
 
+#Set the computer background as SSW's image (for Domain-Joined only)
+function Set-WallPaper([string]$desktopImage)
+{
+     set-itemproperty -path "HKCU:Control Panel\Desktop" -name WallPaper -value $desktopImage
+     RUNDLL32.EXE USER32.DLL,UpdatePerUserSystemParameters ,1 ,True
+}
+
+#Download the SSW wallpaper from GitHub
+$mydocuments = [environment]::getfolderpath("mydocuments")
+$mydocumentsfull = $mydocuments + "\SSWBackground.jpg"
+$url = "https://raw.githubusercontent.com/SSWConsulting/LoginScript/master/Script/White-SSW-Wallpaper.jpg"
+$wc = New-Object System.Net.WebClient
+$wc.DownloadFile($url, $mydocumentsfull)
+Set-Wallpaper $mydocumentsfull
+
+#If computer is domain-joined, set the wallpaper
+if ($noDomainUsername -eq $False) {
+    Set-Wallpaper $mydocumentsfull
+    Add-Content -Path $ScriptLogFile -Value '   SSWBackground.jpg Copy      [Done]'
+}
+
 #Writes the log in our server
 LogWrite
 
@@ -331,7 +352,6 @@ else {
 	Add-Content -Path $ScriptLogFile -Value '   Manual username: ' -NoNewline
     Add-Content -Path $ScriptLogFile -Value  $($username.ToString())
 }
-
 
 Add-Content -Path $ScriptLogFile -Value ' '
 Add-Content -Path $ScriptLogFile -Value 'From your friendly System Administrators'
