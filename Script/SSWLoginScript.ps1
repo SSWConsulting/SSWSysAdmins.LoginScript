@@ -325,7 +325,7 @@ Set-Wallpaper $mydocumentsfull
 #If computer is domain-joined, set the wallpaper
 if ($noDomainUsername -eq $False) {
     Set-Wallpaper $mydocumentsfull
-    Add-Content -Path $ScriptLogFile -Value '   SSWBackground.jpg Copy      [Done]'
+    Add-Content -Path $ScriptLogFile -Value '   SSWBackground.jpg Copy                     [Done]'
 }
 
 #Writes the log in our server
