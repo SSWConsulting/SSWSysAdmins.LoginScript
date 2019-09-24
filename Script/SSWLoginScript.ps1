@@ -316,8 +316,8 @@ function Set-WallPaper([string]$desktopImage)
 
 #Download the SSW wallpaper from GitHub
 $mydocuments = [environment]::getfolderpath("mydocuments")
-$mydocumentsfull = $mydocuments + "\SSWBackground.jpg"
-$url = "https://raw.githubusercontent.com/SSWConsulting/LoginScript/master/Script/White-SSW-Wallpaper.jpg"
+$mydocumentsfull = $mydocuments + "\SSWBackground.bmp"
+$url = "https://github.com/SSWConsulting/LoginScript/raw/master/Script/White-SSW-Wallpaper.bmp"
 $wc = New-Object System.Net.WebClient
 $wc.DownloadFile($url, $mydocumentsfull)
 Set-Wallpaper $mydocumentsfull
