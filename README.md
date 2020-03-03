@@ -1,5 +1,5 @@
 # LoginScript
-This login script pulls default Office and SnagIt templates from GitHub into employee's computers.
+SysAdmin - This login script pulls default Office and SnagIt templates from GitHub into employee's computers.
 
 How to use it:
 
