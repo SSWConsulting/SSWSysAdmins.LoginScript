@@ -14,3 +14,5 @@ iex (new-object net.webclient).downloadstring('https://github.com/SSWConsulting/
 	6. The script should copy everything, close itself and open a notepad with the log when it's done.
 	
 	Note: Some red errors may appear. If you have any problems, ask Kaique at KaiqueBiancatti@ssw.com.au.
+
+Owner: [Kaique Biancatti](https://www.ssw.com.au/people/kaique-biancatti)
