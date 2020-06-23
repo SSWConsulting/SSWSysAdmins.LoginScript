@@ -1,8 +1,0 @@
-xcopy "\\fileserver.sydney.ssw.com.au\DataSSW\DataSSWEmployees\Templates\Normal.dot" "%APPDATA%\Microsoft\Templates\Normal.dot" 
-xcopy "\\fileserver.sydney.ssw.com.au\DataSSW\DataSSWEmployees\Templates\Normal.dotm" "%APPDATA%\Microsoft\Templates\Normal.dotm" 
-xcopy "\\fileserver.sydney.ssw.com.au\DataSSW\DataSSWEmployees\Templates\ProposalNormalTemplate.dotx" "%APPDATA%\Microsoft\Templates\ProposalNormalTemplate.dotx" 
-xcopy "\\fileserver.sydney.ssw.com.au\DataSSW\DataSSWEmployees\Templates\NormalEmail.dot" "%APPDATA%\Microsoft\Templates\NormalEmail.dot" 
-xcopy "\\fileserver.sydney.ssw.com.au\DataSSW\DataSSWEmployees\Templates\Microsoft_Normal.dotx" "%APPDATA%\Microsoft\Templates\Microsoft_Normal.dotx" 
-xcopy "\\fileserver.sydney.ssw.com.au\DataSSW\DataSSWEmployees\Templates\Blank.potx" "%APPDATA%\Microsoft\Templates\Blank.potx" 
-xcopy /Y "\\fileserver.sydney.ssw.com.au\DataSSW\DataSSWEmployees\Templates\NormalEmail.dotm" "%APPDATA%\Microsoft\Templates\"
-xcopy /Y ""\\fileserver.sydney.ssw.com.au\DataSSW\DataSSWEmployees\Templates\NormalEmail.dotx" "%APPDATA%\Microsoft\QuickStyles\"
