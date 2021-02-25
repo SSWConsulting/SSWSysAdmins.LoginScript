@@ -7,7 +7,7 @@ How to use it:
 	2. Start a PowerShell session as an Administrator
 	3. Run:
 ```powershell
-iex (new-object net.webclient).downloadstring('https://github.com/SSWConsulting/SSWSysAdmins.LoginScript/raw/master/Script/SSWLoginScript.ps1')
+iex (new-object net.webclient).downloadstring('https://github.com/SSWConsulting/SSWSysAdmins.LoginScript/raw/main/Script/SSWLoginScript.ps1')
 ```
 	4. Click 'Ok' to the prompts, if any;
 	5. If you are not logged in as a SSW user, input your username on the pop-up that appears;
