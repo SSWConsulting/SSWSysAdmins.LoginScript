@@ -60,7 +60,7 @@ if ($ShareExists -eq $true) {
     Set-Variable -Name 'ScriptTemplateSource' -Value 'file://fileserver.sydney.ssw.com.au/DataSSW/DataSSWEmployees'
 }
 else {
-    Set-Variable -Name 'ScriptTemplateSource' -Value 'https://github.com/SSWConsulting/SSWSysAdmins.LoginScript/raw/master/'
+    Set-Variable -Name 'ScriptTemplateSource' -Value 'https://github.com/SSWConsulting/SSWSysAdmins.LoginScript/raw/main/'
 }
 
 #Initializing the LogFile
