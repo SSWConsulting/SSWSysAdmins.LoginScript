@@ -111,6 +111,7 @@ Add-Content -Path $ScriptLogFile -Value '   3. Copied Office Templates to your m
 Add-Content -Path $ScriptLogFile -Value '     a. If you do not have access to our fileserver, copied them from GitHub'
 Add-Content -Path $ScriptLogFile -Value '   4. Copied Outlook Signatures to your PC (using the same rules as above)'
 Add-Content -Path $ScriptLogFile -Value '   5. Closed SnagIt if it was open, and copied its templates to your PC (using the same rules as above)'
+Add-Content -Path $ScriptLogFile -Value '   6. Changed the desktop background image to be SSW, if user wanted to do so'
 Add-Content -Path $ScriptLogFile -Value ''
 Add-Content -Path $ScriptLogFile -Value '   Please review the success or failure below:'
 
