@@ -5,7 +5,7 @@
     PowerShell Login Script for SSW.
     It checks if running elevated, flushes the DNS, syncs PC time with Sydney server, copies Office templates and outlook signatures from fileserver or github to your machine, and copies snagit templates.
 .EXAMPLE
-    PS> iex (new-object net.webclient).downloadstring('https://github.com/SSWConsulting/SSWSysAdmins.LoginScript/raw/master/Script/SSWLoginScript.ps1')
+    PS> iex (new-object net.webclient).downloadstring('https://github.com/SSWConsulting/SSWSysAdmins.LoginScript/raw/main/Script/SSWLoginScript.ps1')
 .OUTPUTS
     flushes the DNS, syncs PC time with Sydney server, copies Office templates and outlook signatures from fileserver or github to your machine, and copies snagit templates.
 .NOTES
@@ -26,6 +26,7 @@ Version     Author              Date            Comment
 2.3         Alex Breskin        28/08/2019      Added logging conditions for directories that may not exist
 2.4         Kaique Biancatti    24/09/2019      Added SSW background for domain-joined computers
 2.5         Kaique Biancatti    17/07/2020      Changed log function name, changed the GitHub URL, cleaned up the code a bit, added Comment-Based help at the top
+2.6         Kaique Biancatti    28/04/2021      Added background popup, fixed urls to be "main" not master, fixed SysAdmin names
 
 DO NOT FORGET TO UPDATE THE SCRIPTVERSION VARIABLE BELOW
 #>
@@ -35,7 +36,7 @@ param (
 )
 
 #Sets our Script version. Please update this variable anytime a new version is made available
-$ScriptVersion = '2.5'
+$ScriptVersion = '2.6'
 
 $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
 If ($currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator) -eq $False) {
@@ -307,16 +308,14 @@ function Set-WallPaper([string]$desktopImage) {
     RUNDLL32.EXE USER32.DLL, UpdatePerUserSystemParameters , 1 , True
 }
 
-#Download the SSW wallpaper from GitHub
-$mydocuments = [environment]::getfolderpath("mydocuments")
-$mydocumentsfull = $mydocuments + "\SSWBackground.bmp"
-$url = "https://github.com/SSWConsulting/SSWSysAdmins.LoginScript/raw/master/Script/White-SSW-Wallpaper.bmp"
-$wc = New-Object System.Net.WebClient
-$wc.DownloadFile($url, $mydocumentsfull)
-Set-Wallpaper $mydocumentsfull
-
-#If computer is domain-joined, set the wallpaper
-if ($noDomainUsername -eq $False) {
+$Background = [System.Windows.Forms.MessageBox]::Show("Do you want the SSW desktop background? It will change your current background.", "SSW Background", 4, 32) 
+if ($Background -eq "Yes") {
+    #Download the SSW wallpaper from GitHub
+    $mydocuments = [environment]::getfolderpath("mydocuments")
+    $mydocumentsfull = $mydocuments + "\SSWBackground.bmp"
+    $url = "https://github.com/SSWConsulting/SSWSysAdmins.LoginScript/raw/main/Script/White-SSW-Wallpaper.bmp"
+    $wc = New-Object System.Net.WebClient
+    $wc.DownloadFile($url, $mydocumentsfull)
     Set-Wallpaper $mydocumentsfull
     Add-Content -Path $ScriptLogFile -Value '   SSWBackground.jpg Copy                     [Done]'
 }
@@ -348,7 +347,7 @@ else {
 
 Add-Content -Path $ScriptLogFile -Value ' '
 Add-Content -Path $ScriptLogFile -Value 'From your friendly System Administrators'
-Add-Content -Path $ScriptLogFile -Value 'Steven Andrews & Kiki Biancatti & Mehmet Ozdemir'
+Add-Content -Path $ScriptLogFile -Value 'Kiki Biancatti & Mehmet Ozdemir'
 Add-Content -Path $ScriptLogFile -Value 'sswcom.sharepoint.com/SysAdmin'
 
 #Opens up notepad at the end with our completed log
