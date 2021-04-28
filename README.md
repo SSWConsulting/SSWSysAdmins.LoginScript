@@ -1,5 +1,5 @@
 # LoginScript
-SysAdmin - This login does:
+SysAdmin - This login script does:
 
    1. Flushes DNS
    2. Synchronizes your PC time with the computer time of the Sydney server
