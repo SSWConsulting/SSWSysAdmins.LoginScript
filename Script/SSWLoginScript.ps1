@@ -309,6 +309,8 @@ function Set-WallPaper([string]$desktopImage) {
     RUNDLL32.EXE USER32.DLL, UpdatePerUserSystemParameters , 1 , True
 }
 
+# Load assembly
+[System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
 $Background = [System.Windows.Forms.MessageBox]::Show("Do you want the SSW desktop background? It will change your current background.", "SSW Background", 4, 32) 
 if ($Background -eq "Yes") {
     #Download the SSW wallpaper from GitHub
