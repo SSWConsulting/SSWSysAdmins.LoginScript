@@ -27,6 +27,7 @@ Version     Author              Date            Comment
 2.4         Kaique Biancatti    24/09/2019      Added SSW background for domain-joined computers
 2.5         Kaique Biancatti    17/07/2020      Changed log function name, changed the GitHub URL, cleaned up the code a bit, added Comment-Based help at the top
 2.6         Kaique Biancatti    28/04/2021      Added background popup, fixed urls to be "main" not master, fixed SysAdmin names
+2.7         Kaique Biancatti    15/09/2021      Changed references from flea to sydfilesp03.sydney.ssw.com.au, changed SysAdmin names, disabled most signature fetches as we are moving to CodeTwo
 
 DO NOT FORGET TO UPDATE THE SCRIPTVERSION VARIABLE BELOW
 #>
@@ -34,9 +35,8 @@ DO NOT FORGET TO UPDATE THE SCRIPTVERSION VARIABLE BELOW
 param (
     [string]$username = ''
 )
-
 #Sets our Script version. Please update this variable anytime a new version is made available
-$ScriptVersion = '2.6'
+$ScriptVersion = '2.7'
 
 $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
 If ($currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator) -eq $False) {
@@ -44,9 +44,20 @@ If ($currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administ
     Start-Process powershell.exe "-File", ('"{0}"' -f $MyInvocation.MyCommand.Path) -Verb RunAs
     exit
 }
-#This bit will create a function to write a log in our fileserver
-$Logfile = "\\flea\DataSSW\DataSSWEmployees\LoginScriptUserLogs.log"
 
+#Functions
+#This function adds the error message to the log if any
+Function Add-ErrorToLog {
+    $RecentError = $Error[0]
+    if ($RecentError -ne $null) {
+        Add-Content -Path $ScriptLogFile -Value "   >> $($RecentError)"
+    }
+    else {
+    }
+}
+
+#This bit will create a function to write a log in our fileserver
+$Logfile = "\\sydfilesp03.sydney.ssw.com.au\DataSSW\DataSSWEmployees\LoginScriptUserLogs.log"
 Function Write-Log {
     $username = $env:USERNAME   
     $PcName = $env:computername
@@ -56,7 +67,7 @@ Function Write-Log {
 }
 
 #This part tests if we can find the fileserver. If we can't, we will get the Signatures and Templates from GitHub instead.
-$ShareExists = Test-Path $('filesystem::\\fileserver\DataSSW\DataSSWEmployees\Templates')
+$ShareExists = Test-Path $('filesystem::\\fileserver.sydney.ssw.com.au\DataSSW\DataSSWEmployees\Templates')
 if ($ShareExists -eq $true) {
     Set-Variable -Name 'ScriptTemplateSource' -Value 'file://fileserver.sydney.ssw.com.au/DataSSW/DataSSWEmployees'
 }
@@ -113,15 +124,16 @@ Add-Content -Path $ScriptLogFile -Value '   4. Copied Outlook Signatures to your
 Add-Content -Path $ScriptLogFile -Value '   5. Closed SnagIt if it was open, and copied its templates to your PC (using the same rules as above)'
 Add-Content -Path $ScriptLogFile -Value '   6. Changed the desktop background image to be SSW, if user wanted to do so'
 Add-Content -Path $ScriptLogFile -Value ''
-Add-Content -Path $ScriptLogFile -Value '   Please review the success or failure below:'
+Add-Content -Path $ScriptLogFile -Value '   Please review the success or failure below and errors if any:'
 
 #Syncs the time with our domain
 try {
-    net time /domain:sydney.ssw.com.au /set /y 
-    Add-Content -Path $ScriptLogFile -Value '   Sydney Time Sync                           [Done]'
+    net time /domain:sydney.ssw.com.au /set /y   
+    Add-Content -Path $ScriptLogFile -Value '   Sydney Time Sync                                [Done]'  
 }
 catch {
-    Add-Content -Path $ScriptLogFile -Value '   Sydney Time Sync(No access to server)      [Failed]'
+    Add-Content -Path $ScriptLogFile -Value '   Sydney Time Sync(No access to server)           [Failed]'
+    Add-ErrorToLog
 }
 
 #Starts copying the office templates and signatures
@@ -130,10 +142,11 @@ $ScriptFileDestination = $env:APPDATA + '\Microsoft\Templates\Normal.dot'
 
 try {
     Invoke-WebRequest -Uri $ScriptFileSource -OutFile $ScriptFileDestination
-    Add-Content -Path $ScriptLogFile -Value '   Normal.dot Copy                            [Done]'
+    Add-Content -Path $ScriptLogFile -Value '   Normal.dot Copy                                 [Done]'
 }
 catch {    
-    Add-Content -Path $ScriptLogFile -Value '   Normal.dot Copy(Word Open)                 [Failed]'
+    Add-Content -Path $ScriptLogFile -Value '   Normal.dot Copy(Word Open)                      [Failed]'
+    Add-ErrorToLog
 }
 
 $ScriptFileSource = $ScriptTemplateSource + '/Templates/Normal.dotm'
@@ -141,10 +154,11 @@ $ScriptFileDestination = $env:APPDATA + '\Microsoft\Templates\Normal.dotm'
 
 try {
     Invoke-WebRequest -Uri $ScriptFileSource -OutFile $ScriptFileDestination 
-    Add-Content -Path $ScriptLogFile -Value '   Normal.dotm Copy                           [Done]'
+    Add-Content -Path $ScriptLogFile -Value '   Normal.dotm Copy                                [Done]'
 }
 catch {    
-    Add-Content -Path $ScriptLogFile -Value '   Normal.dotm Copy(Word Open)                [Failed]'
+    Add-Content -Path $ScriptLogFile -Value '   Normal.dotm Copy(Word Open)                     [Failed]'
+    Add-ErrorToLog
 }
 
 $ScriptFileSource = $ScriptTemplateSource + '/Templates/ProposalNormalTemplate.dotx'
@@ -152,10 +166,11 @@ $ScriptFileDestination = $env:APPDATA + '\Microsoft\Templates\ProposalNormalTemp
 
 try {
     Invoke-WebRequest -Uri $ScriptFileSource -OutFile $ScriptFileDestination 
-    Add-Content -Path $ScriptLogFile -Value '   ProposalNormalTemplate.dotx Copy           [Done]'
+    Add-Content -Path $ScriptLogFile -Value '   ProposalNormalTemplate.dotx Copy                [Done]'
 }
 catch {
-    Add-Content -Path $ScriptLogFile -Value '   ProposalNormalTemplate.dotx Copy(Word Open)[Failed]'
+    Add-Content -Path $ScriptLogFile -Value '   ProposalNormalTemplate.dotx Copy(Word Open)     [Failed]'
+    Add-ErrorToLog
 }
 
 $ScriptFileSource = $ScriptTemplateSource + '/Templates/NormalEmail.dot'
@@ -163,10 +178,11 @@ $ScriptFileDestination = $env:APPDATA + '\Microsoft\Templates\NormalEmail.dot'
 
 try {
     Invoke-WebRequest -Uri $ScriptFileSource -OutFile $ScriptFileDestination 
-    Add-Content -Path $ScriptLogFile -Value '   NormalEmail.dot Copy                       [Done]'
+    Add-Content -Path $ScriptLogFile -Value '   NormalEmail.dot Copy                            [Done]'
 }
 catch {
-    Add-Content -Path $ScriptLogFile -Value '   NormalEmail.dot Copy(Word Open)            [Failed]'
+    Add-Content -Path $ScriptLogFile -Value '   NormalEmail.dot Copy(Word Open)                 [Failed]'
+    Add-ErrorToLog
 }
 
 $ScriptFileSource = $ScriptTemplateSource + '/Templates/Microsoft_Normal.dotx'
@@ -174,10 +190,11 @@ $ScriptFileDestination = $env:APPDATA + '\Microsoft\Templates\Microsoft_Normal.d
 
 try {
     Invoke-WebRequest -Uri $ScriptFileSource -OutFile $ScriptFileDestination 
-    Add-Content -Path $ScriptLogFile -Value '   Microsoft_Normal.dotx Copy                 [Done]'
+    Add-Content -Path $ScriptLogFile -Value '   Microsoft_Normal.dotx Copy                      [Done]'
 }
 catch {
-    Add-Content -Path $ScriptLogFile -Value '   Microsoft_Normal.dotx Copy(Word Open)      [Failed]'
+    Add-Content -Path $ScriptLogFile -Value '   Microsoft_Normal.dotx Copy(Word Open)           [Failed]'
+    Add-ErrorToLog
 }
 
 $ScriptFileSource = $ScriptTemplateSource + '/Templates/Blank.potx'
@@ -185,10 +202,11 @@ $ScriptFileDestination = $env:APPDATA + '\Microsoft\Templates\Blank.potx'
 
 try {
     Invoke-WebRequest -Uri $ScriptFileSource -OutFile $ScriptFileDestination 
-    Add-Content -Path $ScriptLogFile -Value '   Blank.potx Copy                            [Done]'
+    Add-Content -Path $ScriptLogFile -Value '   Blank.potx Copy                                 [Done]'
 }
 catch {
-    Add-Content -Path $ScriptLogFile -Value '   Blank.potx Copy(Word Open)                 [Failed]'
+    Add-Content -Path $ScriptLogFile -Value '   Blank.potx Copy(Word Open)                      [Failed]'
+    Add-ErrorToLog
 }
 
 $ScriptFileSource = $ScriptTemplateSource + '/Templates/NormalEmail.dotm'
@@ -196,13 +214,15 @@ $ScriptFileDestination = $env:APPDATA + '\Microsoft\Templates\NormalEmail.dotm'
 
 try {
     Invoke-WebRequest -Uri $ScriptFileSource -OutFile $ScriptFileDestination 
-    Add-Content -Path $ScriptLogFile -Value '   NormalEmail.dotm Copy                      [Done]'
+    Add-Content -Path $ScriptLogFile -Value '   NormalEmail.dotm Template Copy                  [Done]'
 }
 catch [System.IO.DirectoryNotFoundException] {
-    Add-Content -Path $ScriptLogFile -Value '   NormalEmail.dotm Copy(Path Not Found)      [Failed]'
+    Add-Content -Path $ScriptLogFile -Value '   NormalEmail.dotm Template Copy(Path Not Found)  [Failed]'
+    Add-ErrorToLog
 }
 catch {
-    Add-Content -Path $ScriptLogFile -Value '   NormalEmail.dotm Copy(Outlook Open)        [Failed]'
+    Add-Content -Path $ScriptLogFile -Value '   NormalEmail.dotm Template Copy(Outlook Open)    [Failed]'
+    Add-ErrorToLog
 }
 
 $ScriptFileSource = $ScriptTemplateSource + '/Templates/NormalEmail.dotm'
@@ -210,13 +230,15 @@ $ScriptFileDestination = $env:APPDATA + '\Microsoft\QuickStyles\NormalEmail.dotm
 
 try {
     Invoke-WebRequest -Uri $ScriptFileSource -OutFile $ScriptFileDestination 
-    Add-Content -Path $ScriptLogFile -Value '   NormalEmail.dotm Copy                      [Done]'
+    Add-Content -Path $ScriptLogFile -Value '   NormalEmail.dotm Quickstyle Copy                [Done]'
 }
 catch [System.IO.DirectoryNotFoundException] {
-    Add-Content -Path $ScriptLogFile -Value '   NormalEmail.dotm Copy(Path Not Found)      [Failed]'
+    Add-Content -Path $ScriptLogFile -Value '   NormalEmail.dotm Quickstyle Copy(Path Not Found)[Failed]'
+    Add-ErrorToLog
 }
 catch {
-    Add-Content -Path $ScriptLogFile -Value '   NormalEmail.dotm Copy(Outlook Open)        [Failed]'
+    Add-Content -Path $ScriptLogFile -Value '   NormalEmail.dotm Quickstyle Copy(Outlook Open)  [Failed]'
+    Add-ErrorToLog
 }
 
 $SignatureDestination = $env:APPDATA + '\Microsoft\Signatures\'
@@ -228,20 +250,24 @@ $ScriptFileDestination = $env:APPDATA + '\Microsoft\Signatures\SSW.htm'
 try {
     if (Test-Path $ScriptFileDestination) {
         Copy-Item $ScriptFileDestination -Destination ($ScriptFileDestination).Replace("SSW.htm", "zzSSW.htm")
-        Add-Content -Path $ScriptLogFile -Value '   SSW.htm Signature Copy or Replace          [Replaced]'
+        Add-Content -Path $ScriptLogFile -Value '   SSW.htm Current Signature Backup (zzSSW)        [Done]'
     }
 }
 catch {
-    Add-Content -Path $ScriptLogFile -Value '   SSW.htm Signature Copy(Outlook Open)       [Failed]'
-}
-try {
-    Invoke-WebRequest -Uri $ScriptFileSource -OutFile $ScriptFileDestination 
-    Add-Content -Path $ScriptLogFile -Value '   SSW.htm Signature Copy                     [Done]'
-}
-catch {
-    Add-Content -Path $ScriptLogFile -Value '   SSW.htm Signature Copy(Outlook Open)       [Failed]'
+    Add-Content -Path $ScriptLogFile -Value '   SSW.htm Signature Copy(Outlook Open)            [Failed]'
+    Add-ErrorToLog
 }
 
+try {
+    Invoke-WebRequest -Uri $ScriptFileSource -OutFile $ScriptFileDestination 
+    Add-Content -Path $ScriptLogFile -Value '   SSW.htm Signature Copy                          [Done]'
+}
+catch {
+    Add-Content -Path $ScriptLogFile -Value '   SSW.htm Signature Copy(Outlook Open)            [Failed]'
+    Add-ErrorToLog
+}
+
+<#Disabling all signature fetch (but htm) as we are moving to a new signature system
 $ScriptFileSource = $ScriptTemplateSource + '/Templates/Outlook/SSW_' + $username + '_Short_Default.txt'
 $ScriptFileDestination = $env:APPDATA + '\Microsoft\Signatures\SSW.txt'
 
@@ -288,19 +314,21 @@ try {
 catch {
     Add-Content -Path $ScriptLogFile -Value '   themedata.thmx Signature Copy(No User)     [Failed]'
 }
+#>
 
 #We need admin permissions to do this. If log stops here, it is because we have no privileges
-Stop-Process -name 'Snagit32', 'SnagitEditor', 'SnagitPriv'  -ErrorAction 'silentlycontinue'
+Stop-Process -name 'Snagit32', 'SnagitEditor', 'SnagitPriv' -ErrorAction 'silentlycontinue'
 
 $ScriptFileSource = $ScriptTemplateSource + '/Templates/SnagIt_DrawQuickStyles.xml'
 $ScriptFileDestination = $env:APPDATA + '\..\Local\TechSmith\Snagit\DrawQuickStyles.xml'
 
 try {
     Invoke-WebRequest -Uri $ScriptFileSource -OutFile $ScriptFileDestination 
-    Add-Content -Path $ScriptLogFile -Value '   DrawQuickStyles.xml Copy                   [Done]'
+    Add-Content -Path $ScriptLogFile -Value '   DrawQuickStyles.xml Copy                        [Done]'
 }
 catch {
-    Add-Content -Path $ScriptLogFile -Value '   DrawQuickStyles.xml Copy(SnagIt Open)      [Failed]'
+    Add-Content -Path $ScriptLogFile -Value '   DrawQuickStyles.xml Copy(SnagIt Open)           [Failed]'
+    Add-ErrorToLog
 }
 
 #Set the computer background as SSW's image (for Domain-Joined only)
@@ -325,7 +353,6 @@ if ($Background -eq "Yes") {
 
 #Writes the log in our server
 Write-Log
-
 Add-Content -Path $ScriptLogFile -Value ''
 Add-Content -Path $ScriptLogFile -Value ''
 
@@ -338,7 +365,6 @@ Add-Content -Path $ScriptLogFile -Value '   Last run: ' -NoNewline
 Add-Content -Path $ScriptLogFile -Value  $((Get-Date).ToString())
 
 if ($noDomainUsername -eq $false) {
-
     Add-Content -Path $ScriptLogFile -Value '   Domain username: ' -NoNewline
     Add-Content -Path $ScriptLogFile -Value  $($username.ToString())
 }	
@@ -350,8 +376,8 @@ else {
 
 Add-Content -Path $ScriptLogFile -Value ' '
 Add-Content -Path $ScriptLogFile -Value 'From your friendly System Administrators'
-Add-Content -Path $ScriptLogFile -Value 'Kiki Biancatti & Mehmet Ozdemir'
-Add-Content -Path $ScriptLogFile -Value 'sswcom.sharepoint.com/SysAdmin'
+Add-Content -Path $ScriptLogFile -Value 'Kiki Biancatti & Warwick Leahy & Mehmet Ozdemir'
+Add-Content -Path $ScriptLogFile -Value 'https://sswcom.sharepoint.com/SysAdmin'
 
 #Opens up notepad at the end with our completed log
 notepad C:\SSWLoginScript_LastRun.log
