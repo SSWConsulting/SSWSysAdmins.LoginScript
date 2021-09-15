@@ -348,7 +348,7 @@ if ($Background -eq "Yes") {
     $wc = New-Object System.Net.WebClient
     $wc.DownloadFile($url, $mydocumentsfull)
     Set-Wallpaper $mydocumentsfull
-    Add-Content -Path $ScriptLogFile -Value '   SSWBackground.jpg Copy                     [Done]'
+    Add-Content -Path $ScriptLogFile -Value '   SSWBackground.jpg Copy                          [Done]'
 }
 
 #Writes the log in our server
