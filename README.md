@@ -1,5 +1,13 @@
 # LoginScript
-SysAdmin - This login script pulls default Office and SnagIt templates from GitHub into employee's computers.
+SysAdmin - This login script does:
+
+   1. Flushes DNS
+   2. Synchronizes your PC time with the computer time of the Sydney server
+   3. Copies Office Templates to your machine, as per the rule https://rules.ssw.com.au/have-a-companywide-word-template
+     a. If you do not have access to our fileserver, copies them from GitHub
+   4. Copies Outlook Signatures to your PC (using the same rules as above)
+   5. Closes SnagIt if it was open, and copied its templates to your PC (using the same rules as above)
+   6. Changes the desktop background image to be SSW, if user wants to do so
 
 How to use it:
 
@@ -7,7 +15,7 @@ How to use it:
 	2. Start a PowerShell session as an Administrator
 	3. Run:
 ```powershell
-iex (new-object net.webclient).downloadstring('https://github.com/SSWConsulting/SSWSysAdmins.LoginScript/raw/master/Script/SSWLoginScript.ps1')
+iex (new-object net.webclient).downloadstring('https://github.com/SSWConsulting/SSWSysAdmins.LoginScript/raw/main/Script/SSWLoginScript.ps1')
 ```
 	4. Click 'Ok' to the prompts, if any;
 	5. If you are not logged in as a SSW user, input your username on the pop-up that appears;
