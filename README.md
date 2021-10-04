@@ -23,10 +23,11 @@ iex (new-object net.webclient).downloadstring('https://github.com/SSWConsulting/
 	
 	Note: Some red errors may appear. If you have any problems, ask Kaique at KaiqueBiancatti@ssw.com.au.
 
-Owner: [Kaique Biancatti](https://www.ssw.com.au/people/kaique-biancatti)
-
 **If you have reset your PC, you need to remember to re-run the script!**
 
 ![Reset PC](/Images/ResetPC.png)
 
 **Figure: If you clicked on “Reset this PC”, you need to re-run the script**
+
+
+## Owner: [Kaique Biancatti](https://www.ssw.com.au/people/kaique-biancatti)
