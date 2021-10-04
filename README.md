@@ -25,7 +25,7 @@ iex (new-object net.webclient).downloadstring('https://github.com/SSWConsulting/
 
 **If you have reset your PC, you need to remember to re-run the script!**
 
-![Reset PC](/Images/ResetPC.png)
+![Reset PC](/Images/ResetPC1.png)
 
 **Figure: If you clicked on “Reset this PC”, you need to re-run the script**
 
