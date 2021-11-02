@@ -28,6 +28,7 @@ Version     Author              Date            Comment
 2.5         Kaique Biancatti    17/07/2020      Changed log function name, changed the GitHub URL, cleaned up the code a bit, added Comment-Based help at the top
 2.6         Kaique Biancatti    28/04/2021      Added background popup, fixed urls to be "main" not master, fixed SysAdmin names
 2.7         Kaique Biancatti    15/09/2021      Changed references from flea to sydfilesp03.sydney.ssw.com.au, changed SysAdmin names, disabled most signature fetches as we are moving to CodeTwo
+2.8         Kaique Biancatti    02/11/2021      Deleted signature steps and error handling, we are fully using CodeTwo now so no need for signatures
 
 DO NOT FORGET TO UPDATE THE SCRIPTVERSION VARIABLE BELOW
 #>
@@ -36,7 +37,7 @@ param (
     [string]$username = ''
 )
 #Sets our Script version. Please update this variable anytime a new version is made available
-$ScriptVersion = '2.7'
+$ScriptVersion = '2.8'
 
 $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
 If ($currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator) -eq $False) {
@@ -120,9 +121,8 @@ Add-Content -Path $ScriptLogFile -Value '   1. Flushed DNS'
 Add-Content -Path $ScriptLogFile -Value '   2. Synchronized your PC time with the computer time of the Sydney server'
 Add-Content -Path $ScriptLogFile -Value '   3. Copied Office Templates to your machine, as per the rule https://rules.ssw.com.au/have-a-companywide-word-template'
 Add-Content -Path $ScriptLogFile -Value '     a. If you do not have access to our fileserver, copied them from GitHub'
-Add-Content -Path $ScriptLogFile -Value '   4. Copied Outlook Signatures to your PC (using the same rules as above)'
-Add-Content -Path $ScriptLogFile -Value '   5. Closed SnagIt if it was open, and copied its templates to your PC (using the same rules as above)'
-Add-Content -Path $ScriptLogFile -Value '   6. Changed the desktop background image to be SSW, if user wanted to do so'
+Add-Content -Path $ScriptLogFile -Value '   4. Closed SnagIt if it was open, and copied its templates to your PC (using the same rules as above)'
+Add-Content -Path $ScriptLogFile -Value '   5. Changed the desktop background image to be SSW, if user wanted to do so'
 Add-Content -Path $ScriptLogFile -Value ''
 Add-Content -Path $ScriptLogFile -Value '   Please review the success or failure below and errors if any:'
 
@@ -241,81 +241,6 @@ catch {
     Add-ErrorToLog
 }
 
-$SignatureDestination = $env:APPDATA + '\Microsoft\Signatures\'
-New-Item -ItemType Directory -Force -Path $SignatureDestination  | Out-Null 
-
-$ScriptFileSource = $ScriptTemplateSource + '/Templates/Outlook/SSW_' + $username + '_Short_Default.htm'
-$ScriptFileDestination = $env:APPDATA + '\Microsoft\Signatures\SSW.htm'
-
-try {
-    if (Test-Path $ScriptFileDestination) {
-        Copy-Item $ScriptFileDestination -Destination ($ScriptFileDestination).Replace("SSW.htm", "zzSSW.htm")
-        Add-Content -Path $ScriptLogFile -Value '   SSW.htm Current Signature Backup (zzSSW)        [Done]'
-    }
-}
-catch {
-    Add-Content -Path $ScriptLogFile -Value '   SSW.htm Signature Copy(Outlook Open)            [Failed]'
-    Add-ErrorToLog
-}
-
-try {
-    Invoke-WebRequest -Uri $ScriptFileSource -OutFile $ScriptFileDestination 
-    Add-Content -Path $ScriptLogFile -Value '   SSW.htm Signature Copy                          [Done]'
-}
-catch {
-    Add-Content -Path $ScriptLogFile -Value '   SSW.htm Signature Copy(Outlook Open)            [Failed]'
-    Add-ErrorToLog
-}
-
-<#Disabling all signature fetch (but htm) as we are moving to a new signature system
-$ScriptFileSource = $ScriptTemplateSource + '/Templates/Outlook/SSW_' + $username + '_Short_Default.txt'
-$ScriptFileDestination = $env:APPDATA + '\Microsoft\Signatures\SSW.txt'
-
-try {
-    Invoke-WebRequest -Uri $ScriptFileSource -OutFile $ScriptFileDestination 
-    Add-Content -Path $ScriptLogFile -Value '   SSW.txt Signature Copy                     [Done]'
-}
-catch {
-    Add-Content -Path $ScriptLogFile -Value '   SSW.txt Signature Copy(Outlook Open)       [Failed]'
-}
-
-$SignatureDestination = $env:APPDATA + '\Microsoft\Signatures\SSW_files\'
-New-Item -ItemType Directory -Force -Path $SignatureDestination  | Out-Null 
-
-$ScriptFileSource = $ScriptTemplateSource + '/Templates/Outlook/SSW_' + $username + '_Short_Default_files/colorschememapping.xml'
-$ScriptFileDestination = $env:APPDATA + '\Microsoft\Signatures\SSW_files\colorschememapping.xml'
-
-try {
-    Invoke-WebRequest -Uri $ScriptFileSource -OutFile $ScriptFileDestination 
-    Add-Content -Path $ScriptLogFile -Value '   colorschememapping.xml Signature Copy      [Done]'
-}
-catch {
-    Add-Content -Path $ScriptLogFile -Value '   colorschememapping.xml Signature Copy      [Failed]'
-
-}
-$ScriptFileSource = $ScriptTemplateSource + '/Templates/Outlook/SSW_' + $username + '_Short_Default_files/filelist.xml'
-$ScriptFileDestination = $env:APPDATA + '\Microsoft\Signatures\SSW_files\filelist.xml'
-
-try {
-    Invoke-WebRequest -Uri $ScriptFileSource -OutFile $ScriptFileDestination 
-    Add-Content -Path $ScriptLogFile -Value '   filelist.xml Signature Copy                [Done]'
-}
-catch {
-    Add-Content -Path $ScriptLogFile -Value '   filelist.xml Signature Copy(No User)       [Failed]'
-}
-
-$ScriptFileSource = $ScriptTemplateSource + '/Templates/Outlook/SSW_' + $username + '_Short_Default_files/themedata.thmx'
-$ScriptFileDestination = $env:APPDATA + '\Microsoft\Signatures\SSW_files\themedata.thmx'
-
-try {
-    Invoke-WebRequest -Uri $ScriptFileSource -OutFile $ScriptFileDestination 
-    Add-Content -Path $ScriptLogFile -Value '   themedata.thmx Signature Copy              [Done]'
-}
-catch {
-    Add-Content -Path $ScriptLogFile -Value '   themedata.thmx Signature Copy(No User)     [Failed]'
-}
-#>
-
 #We need admin permissions to do this. If log stops here, it is because we have no privileges
 Stop-Process -name 'Snagit32', 'SnagitEditor', 'SnagitPriv' -ErrorAction 'silentlycontinue'
 
@@ -376,7 +301,7 @@ else {
 
 Add-Content -Path $ScriptLogFile -Value ' '
 Add-Content -Path $ScriptLogFile -Value 'From your friendly System Administrators'
-Add-Content -Path $ScriptLogFile -Value 'Kiki Biancatti & Warwick Leahy & Mehmet Ozdemir'
+Add-Content -Path $ScriptLogFile -Value 'Kiki Biancatti & Warwick Leahy & Chris Schultz & Mehmet Ozdemir'
 Add-Content -Path $ScriptLogFile -Value 'https://sswcom.sharepoint.com/SysAdmin'
 
 #Opens up notepad at the end with our completed log
