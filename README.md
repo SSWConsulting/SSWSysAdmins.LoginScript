@@ -5,9 +5,8 @@ SysAdmin - This login script does:
    2. Synchronizes your PC time with the computer time of the Sydney server
    3. Copies Office Templates to your machine, as per the rule https://rules.ssw.com.au/have-a-companywide-word-template
      a. If you do not have access to our fileserver, copies them from GitHub
-   4. Copies Outlook Signatures to your PC (using the same rules as above)
-   5. Closes SnagIt if it was open, and copied its templates to your PC (using the same rules as above)
-   6. Changes the desktop background image to be SSW, if user wants to do so
+   4. Closes SnagIt if it was open, and copied its templates to your PC (using the same rules as above)
+   5. Changes the desktop background image to be SSW, if user wants to do so
 
 How to use it:
 
@@ -23,4 +22,11 @@ iex (new-object net.webclient).downloadstring('https://github.com/SSWConsulting/
 	
 	Note: Some red errors may appear. If you have any problems, ask Kaique at KaiqueBiancatti@ssw.com.au.
 
-Owner: [Kaique Biancatti](https://www.ssw.com.au/people/kaique-biancatti)
+**If you have reset your PC, you need to remember to re-run the script!**
+
+![Reset PC](/Images/ResetPC1.png)
+
+**Figure: If you clicked on “Reset this PC”, you need to re-run the script**
+
+
+## Owner: [Kaique Biancatti](https://www.ssw.com.au/people/kaique-biancatti)
