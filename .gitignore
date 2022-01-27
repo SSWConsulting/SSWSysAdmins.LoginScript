@@ -1,4 +1,5 @@
 Config.psd1
 Launch.ps1
 Script/LaunchUpdate-GithubTemplates.bat
+Script/Update-GithubTemplates.ps1
 Templates/Outlook

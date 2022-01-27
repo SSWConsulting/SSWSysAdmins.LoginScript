@@ -29,6 +29,7 @@ Version     Author              Date            Comment
 2.6         Kaique Biancatti    28/04/2021      Added background popup, fixed urls to be "main" not master, fixed SysAdmin names
 2.7         Kaique Biancatti    15/09/2021      Changed references from flea to sydfilesp03.sydney.ssw.com.au, changed SysAdmin names, disabled most signature fetches as we are moving to CodeTwo
 2.8         Kaique Biancatti    02/11/2021      Deleted signature steps and error handling, we are fully using CodeTwo now so no need for signatures
+2.9         Kaique Biancatti    27/01/2022      Deleted function to replace background, updated Intranet link
 
 DO NOT FORGET TO UPDATE THE SCRIPTVERSION VARIABLE BELOW
 #>
@@ -37,7 +38,7 @@ param (
     [string]$username = ''
 )
 #Sets our Script version. Please update this variable anytime a new version is made available
-$ScriptVersion = '2.8'
+$ScriptVersion = '2.9'
 
 $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
 If ($currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator) -eq $False) {
@@ -122,7 +123,7 @@ Add-Content -Path $ScriptLogFile -Value '   2. Synchronized your PC time with th
 Add-Content -Path $ScriptLogFile -Value '   3. Copied Office Templates to your machine, as per the rule https://rules.ssw.com.au/have-a-companywide-word-template'
 Add-Content -Path $ScriptLogFile -Value '     a. If you do not have access to our fileserver, copied them from GitHub'
 Add-Content -Path $ScriptLogFile -Value '   4. Closed SnagIt if it was open, and copied its templates to your PC (using the same rules as above)'
-Add-Content -Path $ScriptLogFile -Value '   5. Changed the desktop background image to be SSW, if user wanted to do so'
+# Add-Content -Path $ScriptLogFile -Value '   5. Changed the desktop background image to be SSW, if user wanted to do so'
 Add-Content -Path $ScriptLogFile -Value ''
 Add-Content -Path $ScriptLogFile -Value '   Please review the success or failure below and errors if any:'
 
@@ -256,7 +257,7 @@ catch {
     Add-ErrorToLog
 }
 
-#Set the computer background as SSW's image (for Domain-Joined only)
+<# Set the computer background as SSW's image (for Domain-Joined only)
 function Set-WallPaper([string]$desktopImage) {
     set-itemproperty -path "HKCU:Control Panel\Desktop" -name WallPaper -value $desktopImage
     RUNDLL32.EXE USER32.DLL, UpdatePerUserSystemParameters , 1 , True
@@ -266,7 +267,7 @@ function Set-WallPaper([string]$desktopImage) {
 [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
 $Background = [System.Windows.Forms.MessageBox]::Show("Do you want the SSW desktop background? It will change your current background.", "SSW Background", 4, 32) 
 if ($Background -eq "Yes") {
-    #Download the SSW wallpaper from GitHub
+    Download the SSW wallpaper from GitHub
     $mydocuments = [environment]::getfolderpath("mydocuments")
     $mydocumentsfull = $mydocuments + "\SSWBackground.bmp"
     $url = "https://github.com/SSWConsulting/SSWSysAdmins.LoginScript/raw/main/Script/White-SSW-Wallpaper.bmp"
@@ -275,6 +276,7 @@ if ($Background -eq "Yes") {
     Set-Wallpaper $mydocumentsfull
     Add-Content -Path $ScriptLogFile -Value '   SSWBackground.jpg Copy                          [Done]'
 }
+#>
 
 #Writes the log in our server
 Write-Log
@@ -302,7 +304,7 @@ else {
 Add-Content -Path $ScriptLogFile -Value ' '
 Add-Content -Path $ScriptLogFile -Value 'From your friendly System Administrators'
 Add-Content -Path $ScriptLogFile -Value 'Kiki Biancatti & Warwick Leahy & Chris Schultz & Mehmet Ozdemir'
-Add-Content -Path $ScriptLogFile -Value 'https://sswcom.sharepoint.com/SysAdmin'
+Add-Content -Path $ScriptLogFile -Value 'https://sswcom.sharepoint.com/sites/SSWSysAdmins'
 
 #Opens up notepad at the end with our completed log
 notepad C:\SSWLoginScript_LastRun.log
