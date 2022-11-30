@@ -1,4 +1,4 @@
-# LoginScript
+# SSWSysAdmins.LoginScript
 SysAdmin - This login script does:
 
    1. Flushes DNS
@@ -15,6 +15,17 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManage
 	4. The script should copy everything, close itself and open a notepad with the log when it's done.
 	
 	Note: Some red errors may appear. If you have any problems, ask Kiki at kiki@ssw.com.au.
+	
+
+This script is designed to be run from PowerShell directly, with the link above. Let's see why:
+
+   ✅ Same command for domain-joined and BYOD machines 
+   
+   ✅ Open source - everyone can improve it
+   
+   ✅ Not file server dependent - doesn't require VPN and can be run from anywhere
+   
+   ❌ Manual - It's not run automatically, the above needs manual action  
 
 **If you have reset your PC, you need to remember to re-run the script!**
 
