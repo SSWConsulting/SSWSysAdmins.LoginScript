@@ -2,11 +2,7 @@
 SysAdmin - This login script does:
 
    1. Flushes DNS
-   2. Synchronizes your PC time with the computer time of the Sydney server
-   3. Copies Office Templates to your machine, as per the rule https://rules.ssw.com.au/have-a-companywide-word-template
-     a. If you do not have access to our fileserver, copies them from GitHub
-   4. Closes SnagIt if it was open, and copied its templates to your PC (using the same rules as above)
-   5. Changes the desktop background image to be SSW, if user wants to do so
+   2. Copies Office Templates to your machine, as per the rule https://rules.ssw.com.au/have-a-companywide-word-template
 
 How to use it:
 
@@ -14,13 +10,11 @@ How to use it:
 	2. Start a PowerShell session as an Administrator
 	3. Run:
 ```powershell
-iex (new-object net.webclient).downloadstring('https://github.com/SSWConsulting/SSWSysAdmins.LoginScript/raw/main/Script/SSWLoginScript.ps1')
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex (new-object net.webclient).downloadstring('https://github.com/SSWConsulting/SSWSysAdmins.LoginScript/raw/main/Script/SSWLoginScript.ps1')
 ```
-	4. Click 'Ok' to the prompts, if any;
-	5. If you are not logged in as a SSW user, input your username on the pop-up that appears;
-	6. The script should copy everything, close itself and open a notepad with the log when it's done.
+	4. The script should copy everything, close itself and open a notepad with the log when it's done.
 	
-	Note: Some red errors may appear. If you have any problems, ask Kaique at KaiqueBiancatti@ssw.com.au.
+	Note: Some red errors may appear. If you have any problems, ask Kiki at kiki@ssw.com.au.
 
 **If you have reset your PC, you need to remember to re-run the script!**
 

@@ -3,9 +3,9 @@
     PowerShell Login Script for SSW.
 .DESCRIPTION
     PowerShell Login Script for SSW.
-    It checks if running elevated, flushes the DNS, syncs PC time with Sydney server, copies Office templates and outlook signatures from fileserver or github to your machine, and copies snagit templates.
+    It flushes the DNS, copies Office templates from github to your machine.
 .EXAMPLE
-    PS> iex (new-object net.webclient).downloadstring('https://github.com/SSWConsulting/SSWSysAdmins.LoginScript/raw/main/Script/SSWLoginScript.ps1')
+    PS> Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex (new-object net.webclient).downloadstring('https://github.com/SSWConsulting/SSWSysAdmins.LoginScript/raw/main/Script/SSWLoginScript.ps1')
 .OUTPUTS
     flushes the DNS, syncs PC time with Sydney server, copies Office templates and outlook signatures from fileserver or github to your machine, and copies snagit templates.
 .NOTES
@@ -31,15 +31,15 @@ Version     Author              Date            Comment
 2.8         Kaique Biancatti    02/11/2021      Deleted signature steps and error handling, we are fully using CodeTwo now so no need for signatures
 2.9         Kaique Biancatti    27/01/2022      Deleted function to replace background, updated Intranet link
 3.0         Kaique Biancatti    30/11/2022      Deleted admin check, deleted Sydney time sync, deleted domain account check, changed login folder location, refactored some log commands
+3.1         Kaique Biancatti    30/11/2022      Deleted server log write (this scrips assumes you can be anywhere in the world, not connected to the domain), changed descriptions
 
-DO NOT FORGET TO UPDATE THE SCRIPTVERSION VARIABLE BELOW
+DO NOT FORGET TO UPDATE THE $ScriptVersion AND $ScriptLastUpdated VARIABLE BELOW
 #>
-
 param (
     [string]$username = ''
 )
 #Sets our Script version. Please update this variable anytime a new version is made available
-$ScriptVersion = '3.0'
+$ScriptVersion = '3.1'
 
 #Sets our last update date. Please update this variable anytime a new version is made available
 $ScriptLastUpdated = "30/11/2022"
@@ -53,16 +53,6 @@ Function Add-ErrorToLog {
     }
     else {
     }
-}
-
-#This bit will create a function to write a log in our fileserver
-$Logfile = "\\fileserver.sydney.ssw.com.au\DataSSW\DataSSWEmployees\LoginScriptUserLogs.log"
-Function Write-Log {
-    $username = $env:USERNAME   
-    $PcName = $env:computername
-    $Stamp = (Get-Date).toString("dd/MM/yyyy HH:mm:ss")
-    $Line = "$Stamp $PcName $Username"
-    Add-content $Logfile -value $Line
 }
 
 #Setting Github as the only place to get Templates from
@@ -85,17 +75,12 @@ Clear-DnsClientCache
 
 Write-Host ''
 Write-Host 'All actions performed by this script are written to the log file at' $ScriptLogFile
-Write-Host 'You can also find who ran this script in' $LogFile
 
 #Explains what this script does
 Add-Content -Path $ScriptLogFile -Value ''
 Add-Content -Path $ScriptLogFile -Value 'What did this script do?'
 Add-Content -Path $ScriptLogFile -Value '   1. Flushed DNS'
-# Add-Content -Path $ScriptLogFile -Value '   2. Synchronized your PC time with the computer time of the Sydney server'
 Add-Content -Path $ScriptLogFile -Value '   2. Copied Office Templates from GitHub to your machine, as per the rule https://rules.ssw.com.au/have-a-companywide-word-template'
-# Add-Content -Path $ScriptLogFile -Value '     a. If you do not have access to our fileserver, copied them from GitHub'
-# Add-Content -Path $ScriptLogFile -Value '   4. Closed SnagIt if it was open, and copied its templates to your PC (using the same rules as above)'
-# Add-Content -Path $ScriptLogFile -Value '   5. Changed the desktop background image to be SSW, if user wanted to do so'
 Add-Content -Path $ScriptLogFile -Value ''
 Add-Content -Path $ScriptLogFile -Value '   Please review the success or failure below and errors if any:'
 
@@ -204,8 +189,6 @@ catch {
     Add-ErrorToLog
 }
 
-#Writes the log in our server
-Write-Log
 Add-Content -Path $ScriptLogFile -Value ''
 Add-Content -Path $ScriptLogFile -Value ''
 
@@ -222,4 +205,3 @@ Add-Content -Path $ScriptLogFile -Value 'https://sswcom.sharepoint.com/sites/SSW
 
 #Opens up notepad at the end with our completed log
 notepad $ScriptLogFile
-
