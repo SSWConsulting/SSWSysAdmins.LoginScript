@@ -30,6 +30,7 @@ Version     Author              Date            Comment
 2.7         Kaique Biancatti    15/09/2021      Changed references from flea to sydfilesp03.sydney.ssw.com.au, changed SysAdmin names, disabled most signature fetches as we are moving to CodeTwo
 2.8         Kaique Biancatti    02/11/2021      Deleted signature steps and error handling, we are fully using CodeTwo now so no need for signatures
 2.9         Kaique Biancatti    27/01/2022      Deleted function to replace background, updated Intranet link
+3.0         Kaique Biancatti    30/11/2022      Deleted admin check, deleted Sydney time sync, deleted domain account check, changed login folder location, refactored some log commands
 
 DO NOT FORGET TO UPDATE THE SCRIPTVERSION VARIABLE BELOW
 #>
@@ -38,14 +39,10 @@ param (
     [string]$username = ''
 )
 #Sets our Script version. Please update this variable anytime a new version is made available
-$ScriptVersion = '2.9'
+$ScriptVersion = '3.0'
 
-$currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
-If ($currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator) -eq $False) {
-    # Relaunch as an elevated process:
-    Start-Process powershell.exe "-File", ('"{0}"' -f $MyInvocation.MyCommand.Path) -Verb RunAs
-    exit
-}
+#Sets our last update date. Please update this variable anytime a new version is made available
+$ScriptLastUpdated = "30/11/2022"
 
 #Functions
 #This function adds the error message to the log if any
@@ -59,7 +56,7 @@ Function Add-ErrorToLog {
 }
 
 #This bit will create a function to write a log in our fileserver
-$Logfile = "\\sydfilesp03.sydney.ssw.com.au\DataSSW\DataSSWEmployees\LoginScriptUserLogs.log"
+$Logfile = "\\fileserver.sydney.ssw.com.au\DataSSW\DataSSWEmployees\LoginScriptUserLogs.log"
 Function Write-Log {
     $username = $env:USERNAME   
     $PcName = $env:computername
@@ -68,17 +65,11 @@ Function Write-Log {
     Add-content $Logfile -value $Line
 }
 
-#This part tests if we can find the fileserver. If we can't, we will get the Signatures and Templates from GitHub instead.
-$ShareExists = Test-Path $('filesystem::\\fileserver.sydney.ssw.com.au\DataSSW\DataSSWEmployees\Templates')
-if ($ShareExists -eq $true) {
-    Set-Variable -Name 'ScriptTemplateSource' -Value 'file://fileserver.sydney.ssw.com.au/DataSSW/DataSSWEmployees'
-}
-else {
-    Set-Variable -Name 'ScriptTemplateSource' -Value 'https://github.com/SSWConsulting/SSWSysAdmins.LoginScript/raw/main/'
-}
+#Setting Github as the only place to get Templates from
+Set-Variable -Name 'ScriptTemplateSource' -Value 'https://github.com/SSWConsulting/SSWSysAdmins.LoginScript/raw/main/'
 
 #Initializing the LogFile
-Set-Variable -Name 'ScriptLogFile' -Value 'C:\SSWLoginScript_LastRun.log'
+Set-Variable -Name 'ScriptLogFile' -Value "$Env:Temp\SSWLoginScript_LastRun.log"
 Set-Content -Path $ScriptLogFile -Value 'SSWLoginScript Log' -Force
 Add-Content -Path $ScriptLogFile -Value ''
 Add-Content -Path $ScriptLogFile -Value 'Thanks. The Login Script is now finished!'
@@ -92,25 +83,6 @@ Clear-DnsClientCache
 #This sets the security protocol to use all TLS versions. Without this, Powershell will use TLS1.0 which GitHub does not accept.
 [Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls"
 
-#This bit tries to find if the user is running on a domain account.
-$domain = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name.Split('\')[0]
-if ($domain -eq 'SSW2000') {
-    if ($username -eq '') {
-        $username = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name.Split('\')[1]
-    }
-    $noDomainUsername = $false
-}
-
-if ($username -eq '') {
-    Write-Host ''
-    Write-Host 'Username parameter required if not run on a SSW2000 domain account. Please input username on the pop-up box that just appeared somewhere in your screen.'
-
-    #Calling a VB Prompt for the user if there is no username set    
-    [void][System.Reflection.Assembly]::LoadWithPartialName('Microsoft.VisualBasic')
-    $username = [Microsoft.VisualBasic.Interaction]::InputBox("Enter your name as FirstLast`nWARNING: Case Sensitive eg. AdamCogan", "Please input your SSW username:", "AdamCogan")
-    $noDomainUsername = $true
-}
-
 Write-Host ''
 Write-Host 'All actions performed by this script are written to the log file at' $ScriptLogFile
 Write-Host 'You can also find who ran this script in' $LogFile
@@ -119,23 +91,13 @@ Write-Host 'You can also find who ran this script in' $LogFile
 Add-Content -Path $ScriptLogFile -Value ''
 Add-Content -Path $ScriptLogFile -Value 'What did this script do?'
 Add-Content -Path $ScriptLogFile -Value '   1. Flushed DNS'
-Add-Content -Path $ScriptLogFile -Value '   2. Synchronized your PC time with the computer time of the Sydney server'
-Add-Content -Path $ScriptLogFile -Value '   3. Copied Office Templates to your machine, as per the rule https://rules.ssw.com.au/have-a-companywide-word-template'
-Add-Content -Path $ScriptLogFile -Value '     a. If you do not have access to our fileserver, copied them from GitHub'
-Add-Content -Path $ScriptLogFile -Value '   4. Closed SnagIt if it was open, and copied its templates to your PC (using the same rules as above)'
+# Add-Content -Path $ScriptLogFile -Value '   2. Synchronized your PC time with the computer time of the Sydney server'
+Add-Content -Path $ScriptLogFile -Value '   2. Copied Office Templates from GitHub to your machine, as per the rule https://rules.ssw.com.au/have-a-companywide-word-template'
+# Add-Content -Path $ScriptLogFile -Value '     a. If you do not have access to our fileserver, copied them from GitHub'
+# Add-Content -Path $ScriptLogFile -Value '   4. Closed SnagIt if it was open, and copied its templates to your PC (using the same rules as above)'
 # Add-Content -Path $ScriptLogFile -Value '   5. Changed the desktop background image to be SSW, if user wanted to do so'
 Add-Content -Path $ScriptLogFile -Value ''
 Add-Content -Path $ScriptLogFile -Value '   Please review the success or failure below and errors if any:'
-
-#Syncs the time with our domain
-try {
-    net time /domain:sydney.ssw.com.au /set /y   
-    Add-Content -Path $ScriptLogFile -Value '   Sydney Time Sync                                [Done]'  
-}
-catch {
-    Add-Content -Path $ScriptLogFile -Value '   Sydney Time Sync(No access to server)           [Failed]'
-    Add-ErrorToLog
-}
 
 #Starts copying the office templates and signatures
 $ScriptFileSource = $ScriptTemplateSource + '/Templates/Normal.dot'
@@ -242,70 +204,22 @@ catch {
     Add-ErrorToLog
 }
 
-#We need admin permissions to do this. If log stops here, it is because we have no privileges
-Stop-Process -name 'Snagit32', 'SnagitEditor', 'SnagitPriv' -ErrorAction 'silentlycontinue'
-
-$ScriptFileSource = $ScriptTemplateSource + '/Templates/SnagIt_DrawQuickStyles.xml'
-$ScriptFileDestination = $env:APPDATA + '\..\Local\TechSmith\Snagit\DrawQuickStyles.xml'
-
-try {
-    Invoke-WebRequest -Uri $ScriptFileSource -OutFile $ScriptFileDestination 
-    Add-Content -Path $ScriptLogFile -Value '   DrawQuickStyles.xml Copy                        [Done]'
-}
-catch {
-    Add-Content -Path $ScriptLogFile -Value '   DrawQuickStyles.xml Copy(SnagIt Open)           [Failed]'
-    Add-ErrorToLog
-}
-
-<# Set the computer background as SSW's image (for Domain-Joined only)
-function Set-WallPaper([string]$desktopImage) {
-    set-itemproperty -path "HKCU:Control Panel\Desktop" -name WallPaper -value $desktopImage
-    RUNDLL32.EXE USER32.DLL, UpdatePerUserSystemParameters , 1 , True
-}
-
-# Load assembly
-[System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
-$Background = [System.Windows.Forms.MessageBox]::Show("Do you want the SSW desktop background? It will change your current background.", "SSW Background", 4, 32) 
-if ($Background -eq "Yes") {
-    Download the SSW wallpaper from GitHub
-    $mydocuments = [environment]::getfolderpath("mydocuments")
-    $mydocumentsfull = $mydocuments + "\SSWBackground.bmp"
-    $url = "https://github.com/SSWConsulting/SSWSysAdmins.LoginScript/raw/main/Script/White-SSW-Wallpaper.bmp"
-    $wc = New-Object System.Net.WebClient
-    $wc.DownloadFile($url, $mydocumentsfull)
-    Set-Wallpaper $mydocumentsfull
-    Add-Content -Path $ScriptLogFile -Value '   SSWBackground.jpg Copy                          [Done]'
-}
-#>
-
 #Writes the log in our server
 Write-Log
 Add-Content -Path $ScriptLogFile -Value ''
 Add-Content -Path $ScriptLogFile -Value ''
 
-#Shows the Script Version in the Log
-Add-Content -Path $ScriptLogFile -Value '   Version: ' -NoNewline
-Add-Content -Path $ScriptLogFile -Value $ScriptVersion
+#Shows the Script last update date in the Log
+Add-Content -Path $ScriptLogFile -Value "   Version: $ScriptVersion (updated on $ScriptLastUpdated)"
 
 #Shows the last time the script was run on in the Log
-Add-Content -Path $ScriptLogFile -Value '   Last run: ' -NoNewline
-Add-Content -Path $ScriptLogFile -Value  $((Get-Date).ToString())
-
-if ($noDomainUsername -eq $false) {
-    Add-Content -Path $ScriptLogFile -Value '   Domain username: ' -NoNewline
-    Add-Content -Path $ScriptLogFile -Value  $($username.ToString())
-}	
-else {
-    Add-Content -Path $ScriptLogFile -Value '   Domain username: not found'
-    Add-Content -Path $ScriptLogFile -Value '   Manual username: ' -NoNewline
-    Add-Content -Path $ScriptLogFile -Value  $($username.ToString())
-}
+Add-Content -Path $ScriptLogFile -Value "   Last run on your computer: $((Get-Date).ToString())"
 
 Add-Content -Path $ScriptLogFile -Value ' '
-Add-Content -Path $ScriptLogFile -Value 'From your friendly System Administrators'
-Add-Content -Path $ScriptLogFile -Value 'Kiki Biancatti & Warwick Leahy & Chris Schultz & Mehmet Ozdemir'
+Add-Content -Path $ScriptLogFile -Value 'From your friendly SysAdmins'
+Add-Content -Path $ScriptLogFile -Value 'Kiki Biancatti & Warwick Leahy & Chris Schultz & Mehmet Ozdemir & Ash Anil'
 Add-Content -Path $ScriptLogFile -Value 'https://sswcom.sharepoint.com/sites/SSWSysAdmins'
 
 #Opens up notepad at the end with our completed log
-notepad C:\SSWLoginScript_LastRun.log
+notepad $ScriptLogFile
 
