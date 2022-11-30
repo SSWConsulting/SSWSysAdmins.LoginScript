@@ -32,6 +32,7 @@ Version     Author              Date            Comment
 2.9         Kaique Biancatti    27/01/2022      Deleted function to replace background, updated Intranet link
 3.0         Kaique Biancatti    30/11/2022      Deleted admin check, deleted Sydney time sync, deleted domain account check, changed login folder location, refactored some log commands
 3.1         Kaique Biancatti    30/11/2022      Deleted server log write (this scrips assumes you can be anywhere in the world, not connected to the domain), changed descriptions
+3.2         Kaique Biancatti    30/11/2022      Added a stopwatch, deleted some junk from the folders
 
 DO NOT FORGET TO UPDATE THE $ScriptVersion AND $ScriptLastUpdated VARIABLE BELOW
 #>
@@ -54,6 +55,9 @@ Function Add-ErrorToLog {
     else {
     }
 }
+
+#Let's time this!
+$Script:Stopwatch = [system.diagnostics.stopwatch]::StartNew()
 
 #Setting Github as the only place to get Templates from
 Set-Variable -Name 'ScriptTemplateSource' -Value 'https://github.com/SSWConsulting/SSWSysAdmins.LoginScript/raw/main/'
@@ -197,11 +201,14 @@ Add-Content -Path $ScriptLogFile -Value "   Version: $ScriptVersion (updated on 
 
 #Shows the last time the script was run on in the Log
 Add-Content -Path $ScriptLogFile -Value "   Last run on your computer: $((Get-Date).ToString())"
-
-Add-Content -Path $ScriptLogFile -Value ' '
+Add-Content -Path $ScriptLogFile -Value "   This script took $($Script:Stopwatch.Elapsed.ToString('mm')) minutes and $($Script:Stopwatch.Elapsed.ToString('ss')) seconds to run"
+Add-Content -Path $ScriptLogFile -Value ''
 Add-Content -Path $ScriptLogFile -Value 'From your friendly SysAdmins'
 Add-Content -Path $ScriptLogFile -Value 'Kiki Biancatti & Warwick Leahy & Chris Schultz & Mehmet Ozdemir & Ash Anil'
 Add-Content -Path $ScriptLogFile -Value 'https://sswcom.sharepoint.com/sites/SSWSysAdmins'
+
+#Let's stop timing this!
+$Script:Stopwatch.Stop();
 
 #Opens up notepad at the end with our completed log
 notepad $ScriptLogFile
