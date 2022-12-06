@@ -7,7 +7,7 @@ SysAdmin - This login script does:
 How to use it:
 
 	1. Close any Office applications open (or else the templates will not be copied);
-	2. Start a PowerShell session as an Administrator
+	2. Start a PowerShell session
 	3. Run:
 ```powershell
 Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex (new-object net.webclient).downloadstring('https://github.com/SSWConsulting/SSWSysAdmins.LoginScript/raw/main/Script/SSWLoginScript.ps1')
