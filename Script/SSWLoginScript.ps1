@@ -40,7 +40,7 @@ param (
     [string]$username = ''
 )
 #Sets our Script version. Please update this variable anytime a new version is made available
-$ScriptVersion = '3.1'
+$ScriptVersion = '3.2'
 
 #Sets our last update date. Please update this variable anytime a new version is made available
 $ScriptLastUpdated = "30/11/2022"
