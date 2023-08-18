@@ -101,15 +101,27 @@ else {
 }
 
 #Starts copying the office templates and signatures
+$ScriptFileSource = $ScriptTemplateSource + $languageFolder + '/Normal.dotx'
+$ScriptFileDestination = $env:APPDATA + '\Microsoft\Templates\Normal.dotx'
+
+try {
+    Invoke-WebRequest -Uri $ScriptFileSource -OutFile $ScriptFileDestination
+    Add-Content -Path $ScriptLogFile -Value "   Normal.dotx $languageFolder Copy                               [Done]"
+}
+catch {    
+    Add-Content -Path $ScriptLogFile -Value "   Normal.dotx $languageFolder Copy(Word Open)                    [Failed]"
+    Add-ErrorToLog
+}
+
 $ScriptFileSource = $ScriptTemplateSource + $languageFolder + '/Normal.dot'
 $ScriptFileDestination = $env:APPDATA + '\Microsoft\Templates\Normal.dot'
 
 try {
     Invoke-WebRequest -Uri $ScriptFileSource -OutFile $ScriptFileDestination
-    Add-Content -Path $ScriptLogFile -Value '   Normal.dot Copy                                 [Done]'
+    Add-Content -Path $ScriptLogFile -Value "   Normal.dot $languageFolder Copy                                [Done]"
 }
 catch {    
-    Add-Content -Path $ScriptLogFile -Value '   Normal.dot Copy(Word Open)                      [Failed]'
+    Add-Content -Path $ScriptLogFile -Value "   Normal.dot $languageFolder Copy(Word Open)                     [Failed]"
     Add-ErrorToLog
 }
 
@@ -118,10 +130,10 @@ $ScriptFileDestination = $env:APPDATA + '\Microsoft\Templates\Normal.dotm'
 
 try {
     Invoke-WebRequest -Uri $ScriptFileSource -OutFile $ScriptFileDestination 
-    Add-Content -Path $ScriptLogFile -Value '   Normal.dotm Copy                                [Done]'
+    Add-Content -Path $ScriptLogFile -Value "   Normal.dotm $languageFolder Copy                               [Done]"
 }
 catch {    
-    Add-Content -Path $ScriptLogFile -Value '   Normal.dotm Copy(Word Open)                     [Failed]'
+    Add-Content -Path $ScriptLogFile -Value "   Normal.dotm $languageFolder Copy(Word Open)                    [Failed]"
     Add-ErrorToLog
 }
 
