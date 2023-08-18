@@ -60,7 +60,7 @@ Function Add-ErrorToLog {
 $Script:Stopwatch = [system.diagnostics.stopwatch]::StartNew()
 
 #Setting Github as the only place to get Templates from
-Set-Variable -Name 'ScriptTemplateSource' -Value 'https://github.com/SSWConsulting/SSWSysAdmins.LoginScript/raw/main/'
+Set-Variable -Name 'ScriptTemplateSource' -Value 'https://github.com/SSWConsulting/SSWSysAdmins.LoginScript/raw/main/Templates'
 
 #Initializing the LogFile
 Set-Variable -Name 'ScriptLogFile' -Value "$Env:Temp\SSWLoginScript_LastRun.log"
@@ -88,8 +88,20 @@ Add-Content -Path $ScriptLogFile -Value '   2. Copied Office Templates from GitH
 Add-Content -Path $ScriptLogFile -Value ''
 Add-Content -Path $ScriptLogFile -Value '   Please review the success or failure below and errors if any:'
 
+#Gets the system locale so we use the right templates
+$languageFolder = ""
+$SystemLocale = get-winsystemlocale | Select-Object -expandproperty name
+
+if ($SystemLocale -like 'fr*') {
+    $languageFolder = '/French'
+    write-host 'Based on your regional settings, we are going to use French templates (where available).'
+}
+else {
+    write-host 'Based on your regional settings, we are going to use English templates.'
+}
+
 #Starts copying the office templates and signatures
-$ScriptFileSource = $ScriptTemplateSource + '/Templates/Normal.dot'
+$ScriptFileSource = $ScriptTemplateSource + $languageFolder + '/Normal.dot'
 $ScriptFileDestination = $env:APPDATA + '\Microsoft\Templates\Normal.dot'
 
 try {
@@ -101,7 +113,7 @@ catch {
     Add-ErrorToLog
 }
 
-$ScriptFileSource = $ScriptTemplateSource + '/Templates/Normal.dotm'
+$ScriptFileSource = $ScriptTemplateSource + $languageFolder + '/Normal.dotm'
 $ScriptFileDestination = $env:APPDATA + '\Microsoft\Templates\Normal.dotm'
 
 try {
@@ -113,7 +125,7 @@ catch {
     Add-ErrorToLog
 }
 
-$ScriptFileSource = $ScriptTemplateSource + '/Templates/ProposalNormalTemplate.dotx'
+$ScriptFileSource = $ScriptTemplateSource + '/ProposalNormalTemplate.dotx'
 $ScriptFileDestination = $env:APPDATA + '\Microsoft\Templates\ProposalNormalTemplate.dotx'
 
 try {
@@ -125,7 +137,7 @@ catch {
     Add-ErrorToLog
 }
 
-$ScriptFileSource = $ScriptTemplateSource + '/Templates/NormalEmail.dot'
+$ScriptFileSource = $ScriptTemplateSource + '/NormalEmail.dot'
 $ScriptFileDestination = $env:APPDATA + '\Microsoft\Templates\NormalEmail.dot'
 
 try {
@@ -137,7 +149,7 @@ catch {
     Add-ErrorToLog
 }
 
-$ScriptFileSource = $ScriptTemplateSource + '/Templates/Microsoft_Normal.dotx'
+$ScriptFileSource = $ScriptTemplateSource + '/Microsoft_Normal.dotx'
 $ScriptFileDestination = $env:APPDATA + '\Microsoft\Templates\Microsoft_Normal.dotx'
 
 try {
@@ -149,7 +161,7 @@ catch {
     Add-ErrorToLog
 }
 
-$ScriptFileSource = $ScriptTemplateSource + '/Templates/Blank.potx'
+$ScriptFileSource = $ScriptTemplateSource + '/Blank.potx'
 $ScriptFileDestination = $env:APPDATA + '\Microsoft\Templates\Blank.potx'
 
 try {
@@ -161,7 +173,7 @@ catch {
     Add-ErrorToLog
 }
 
-$ScriptFileSource = $ScriptTemplateSource + '/Templates/NormalEmail.dotm'
+$ScriptFileSource = $ScriptTemplateSource + '/NormalEmail.dotm'
 $ScriptFileDestination = $env:APPDATA + '\Microsoft\Templates\NormalEmail.dotm'
 
 try {
@@ -177,7 +189,7 @@ catch {
     Add-ErrorToLog
 }
 
-$ScriptFileSource = $ScriptTemplateSource + '/Templates/NormalEmail.dotm'
+$ScriptFileSource = $ScriptTemplateSource + '/NormalEmail.dotm'
 $ScriptFileDestination = $env:APPDATA + '\Microsoft\QuickStyles\NormalEmail.dotm'
 
 try {
