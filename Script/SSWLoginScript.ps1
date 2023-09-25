@@ -228,7 +228,7 @@ Add-Content -Path $ScriptLogFile -Value "   Last run on your computer: $((Get-Da
 Add-Content -Path $ScriptLogFile -Value "   This script took $($Script:Stopwatch.Elapsed.ToString('mm')) minutes and $($Script:Stopwatch.Elapsed.ToString('ss')) seconds to run"
 Add-Content -Path $ScriptLogFile -Value ''
 Add-Content -Path $ScriptLogFile -Value 'From your friendly SysAdmins'
-Add-Content -Path $ScriptLogFile -Value 'Kiki Biancatti & Warwick Leahy & Chris Schultz & Mehmet Ozdemir & Ash Anil'
+Add-Content -Path $ScriptLogFile -Value 'Kiki, Warwick, Chris, and Ash.'
 Add-Content -Path $ScriptLogFile -Value 'https://sswcom.sharepoint.com/sites/SSWSysAdmins'
 
 #Let's stop timing this!
