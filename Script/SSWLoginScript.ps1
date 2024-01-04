@@ -33,6 +33,7 @@ Version     Author              Date            Comment
 3.0         Kaique Biancatti    30/11/2022      Deleted admin check, deleted Sydney time sync, deleted domain account check, changed login folder location, refactored some log commands
 3.1         Kaique Biancatti    30/11/2022      Deleted server log write (this scrips assumes you can be anywhere in the world, not connected to the domain), changed descriptions
 3.2         Kaique Biancatti    30/11/2022      Added a stopwatch, deleted some junk from the folders
+3.3         Kaique Biancatti    04/01/2024      Added functionality to download and open the SSW Snagit theme.
 
 DO NOT FORGET TO UPDATE THE $ScriptVersion AND $ScriptLastUpdated VARIABLE BELOW
 #>
@@ -40,10 +41,10 @@ param (
     [string]$username = ''
 )
 #Sets our Script version. Please update this variable anytime a new version is made available
-$ScriptVersion = '3.2'
+$ScriptVersion = '3.3'
 
 #Sets our last update date. Please update this variable anytime a new version is made available
-$ScriptLastUpdated = "30/11/2022"
+$ScriptLastUpdated = "04/01/2023"
 
 #Functions
 #This function adds the error message to the log if any
@@ -85,6 +86,7 @@ Add-Content -Path $ScriptLogFile -Value ''
 Add-Content -Path $ScriptLogFile -Value 'What did this script do?'
 Add-Content -Path $ScriptLogFile -Value '   1. Flushed DNS'
 Add-Content -Path $ScriptLogFile -Value '   2. Copied Office Templates from GitHub to your machine, as per the rule https://rules.ssw.com.au/have-a-companywide-word-template'
+Add-Content -Path $ScriptLogFile -Value '   3. If you have Snagit installed, copied Snagit Template from GitHub to your machine, then opened the SSW.snagtheme so Snagit registers the SSW theme! As per the rule https://www.ssw.com.au/rules/screenshots-add-branding'
 Add-Content -Path $ScriptLogFile -Value ''
 Add-Content -Path $ScriptLogFile -Value '   Please review the success or failure below and errors if any:'
 
@@ -217,6 +219,43 @@ catch {
     Add-ErrorToLog
 }
 
+# Check if Snagit is installed
+$snagitRegPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
+$snagitInstalled = Get-ChildItem -Path $snagitRegPath -Recurse | Get-ItemProperty | Where-Object { $_.DisplayName -like "*Snagit*" }
+
+if ($snagitInstalled) {
+    # Download and manage the Snagit theme file
+    $snagItThemeUrl = $ScriptTemplateSource + "/SSW.snagtheme"
+    $snagItThemeDestination = "$Env:Temp/SSW.snagtheme"
+
+    try {
+        Invoke-WebRequest -Uri $snagItThemeUrl -OutFile $snagItThemeDestination
+        Add-Content -Path $ScriptLogFile -Value '   SSW.snagtheme Download                          [Done]'
+    }
+    catch {
+        Add-Content -Path $ScriptLogFile -Value '   SSW.snagtheme Download                          [Failed]'
+        Add-ErrorToLog
+    }
+
+    try {
+        if (Test-Path $snagItThemeDestination) {
+            Invoke-Item $snagItThemeDestination
+            Add-Content -Path $ScriptLogFile -Value '   Opening SSW.snagtheme                           [Done]'
+        }
+        else {
+            throw "File not found: $snagItThemeDestination"
+        }
+    }
+    catch {
+        Add-Content -Path $ScriptLogFile -Value '   Opening SSW.snagtheme                           [Failed]'
+        Add-ErrorToLog
+    }
+}
+else {
+    Write-Host "You don't have Snagit installed. The theme will not be downloaded."
+    Add-Content -Path $ScriptLogFile -Value "   You don't have Snagit installed. The theme will not be downloaded."
+}
+
 Add-Content -Path $ScriptLogFile -Value ''
 Add-Content -Path $ScriptLogFile -Value ''
 
@@ -228,7 +267,7 @@ Add-Content -Path $ScriptLogFile -Value "   Last run on your computer: $((Get-Da
 Add-Content -Path $ScriptLogFile -Value "   This script took $($Script:Stopwatch.Elapsed.ToString('mm')) minutes and $($Script:Stopwatch.Elapsed.ToString('ss')) seconds to run"
 Add-Content -Path $ScriptLogFile -Value ''
 Add-Content -Path $ScriptLogFile -Value 'From your friendly SysAdmins'
-Add-Content -Path $ScriptLogFile -Value 'Kiki, Warwick, Chris, and Ash.'
+Add-Content -Path $ScriptLogFile -Value 'Kiki Biancatti & Warwick Leahy & Chris Schultz & Mehmet Ozdemir & Ash Anil & Lloyd Collins'
 Add-Content -Path $ScriptLogFile -Value 'https://sswcom.sharepoint.com/sites/SSWSysAdmins'
 
 #Let's stop timing this!
