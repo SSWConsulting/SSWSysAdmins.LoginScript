@@ -34,6 +34,7 @@ Version     Author              Date            Comment
 3.1         Kaique Biancatti    30/11/2022      Deleted server log write (this scrips assumes you can be anywhere in the world, not connected to the domain), changed descriptions
 3.2         Kaique Biancatti    30/11/2022      Added a stopwatch, deleted some junk from the folders
 3.3         Kaique Biancatti    04/01/2024      Added functionality to download and open the SSW Snagit theme.
+3.4         Gordon Beeming      23/02/2024      Removed installing potx file
 
 DO NOT FORGET TO UPDATE THE $ScriptVersion AND $ScriptLastUpdated VARIABLE BELOW
 #>
@@ -41,7 +42,7 @@ param (
     [string]$username = ''
 )
 #Sets our Script version. Please update this variable anytime a new version is made available
-$ScriptVersion = '3.3'
+$ScriptVersion = '3.4'
 
 #Sets our last update date. Please update this variable anytime a new version is made available
 $ScriptLastUpdated = "04/01/2023"
@@ -172,18 +173,6 @@ try {
 }
 catch {
     Add-Content -Path $ScriptLogFile -Value '   Microsoft_Normal.dotx Copy(Word Open)           [Failed]'
-    Add-ErrorToLog
-}
-
-$ScriptFileSource = $ScriptTemplateSource + '/Blank.potx'
-$ScriptFileDestination = $env:APPDATA + '\Microsoft\Templates\Blank.potx'
-
-try {
-    Invoke-WebRequest -Uri $ScriptFileSource -OutFile $ScriptFileDestination 
-    Add-Content -Path $ScriptLogFile -Value '   Blank.potx Copy                                 [Done]'
-}
-catch {
-    Add-Content -Path $ScriptLogFile -Value '   Blank.potx Copy(Word Open)                      [Failed]'
     Add-ErrorToLog
 }
 
