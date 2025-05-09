@@ -3,7 +3,8 @@
 
    1. Flushes DNS
    2. Copies Office Templates to your machine, as per the rule https://rules.ssw.com.au/have-a-companywide-word-template
-   3. If you have Snagit installed, copies Snagit Template to your machine, then opens the SSW.snagtheme so Snagit registers the SSW theme! As per the rule https://www.ssw.com.au/rules/screenshots-add-branding'
+   3. If you have Snagit installed, copies Snagit Template to your machine, then opens the SSW.snagtheme so Snagit registers the SSW theme! As per the rule https://www.ssw.com.au/rules/screenshots-add-branding
+   4. Installs the Inter font, as per our branding: https://www.ssw.com.au/company/typography
 
 ## How to use it:
 
