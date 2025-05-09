@@ -43,16 +43,16 @@ param (
     [string]$username = ''
 )
 #Sets our Script version. Please update this variable anytime a new version is made available
-$ScriptVersion = '3.4'
+$ScriptVersion = '3.5'
 
 #Sets our last update date. Please update this variable anytime a new version is made available
-$ScriptLastUpdated = "04/01/2023"
+$ScriptLastUpdated = "09/05/2025"
 
 #Functions
 #This function adds the error message to the log if any
 Function Add-ErrorToLog {
     $RecentError = $Error[0]
-    if ($RecentError -ne $null) {
+    if ($null -ne $RecentError) {
         Add-Content -Path $ScriptLogFile -Value "   >> $($RecentError)"
     }
     else {
@@ -252,19 +252,24 @@ Write-Host "Installing Inter font"
 # Set font GitHub & download locations
 $interUrl = "https://github.com/google/fonts/raw/main/ofl/inter/Inter%5Bopsz%2Cwght%5D.ttf"
 $interItalicUrl = "https://github.com/google/fonts/raw/main/ofl/inter/Inter-Italic%5Bopsz%2Cwght%5D.ttf"
-$interOutFile = "C:\Temp\fonts\Inter.ttf"
-$interItalicOutFile = "C:\Temp\fonts\Inter-Italic.ttf"
+$fontTempFolder = "C:\temp\fonts"
+$interOutFile = "$fontTempFolder\Inter.ttf"
+$interItalicOutFile = "$fontTempFolder\Inter-Italic.ttf"
 
 # Create temp folder
-try {
-    New-Item -Path "C:\temp\fonts" -ItemType Directory
-    Add-Content -Path $ScriptLogFile -Value '   Fonts temp folder creation                      [Done]'
+if (Test-Path -Path $fontTempFolder -PathType Container) {
+    Write-Host "Fonts temp folder already exists."
 }
-catch {
-    Add-Content -Path $ScriptLogFile -Value '   Could not create Fonts temp folder              [Failed]'
-    Add-ErrorToLog
+else { 
+    try {
+        New-Item -Path $fontTempFolder -ItemType Directory
+        Add-Content -Path $ScriptLogFile -Value '   Fonts temp folder creation                      [Done]'
+    }
+    catch {
+        Add-Content -Path $ScriptLogFile -Value '   Could not create Fonts temp folder              [Failed]'
+        Add-ErrorToLog
+    }
 }
-
 # Download fonts
 try {
     Invoke-WebRequest -Uri $interUrl -OutFile $interOutFile
@@ -283,10 +288,10 @@ try {
     Get-ChildItem -Path $fontsDir -Include *.ttf, *.otf -Recurse | ForEach-Object {
         $fontsFolder.CopyHere($_.FullName, 0x10)
     }
-    Add-Content -Path $ScriptLogFile -Value '   Inter font install                             [Done]'
+    Add-Content -Path $ScriptLogFile -Value '   Inter font install                              [Done]'
 }
 catch {
-    Add-Content -Path $ScriptLogFile -Value '   Could not install fonts                        [Failed]'
+    Add-Content -Path $ScriptLogFile -Value '   Could not install fonts                         [Failed]'
     Add-ErrorToLog
 }
 
@@ -301,7 +306,7 @@ Add-Content -Path $ScriptLogFile -Value "   Last run on your computer: $((Get-Da
 Add-Content -Path $ScriptLogFile -Value "   This script took $($Script:Stopwatch.Elapsed.ToString('mm')) minutes and $($Script:Stopwatch.Elapsed.ToString('ss')) seconds to run"
 Add-Content -Path $ScriptLogFile -Value ''
 Add-Content -Path $ScriptLogFile -Value 'From your friendly SysAdmins'
-Add-Content -Path $ScriptLogFile -Value 'Kiki Biancatti, Chris Schultz, & Mehmet Ozdemir'
+Add-Content -Path $ScriptLogFile -Value 'Kiki Biancatti, Chris Schultz, Rob Thomlinson, & Mehmet Ozdemir'
 Add-Content -Path $ScriptLogFile -Value 'https://sswcom.sharepoint.com/sites/SSWSysAdmins'
 
 #Let's stop timing this!
