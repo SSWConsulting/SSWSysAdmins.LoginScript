@@ -35,6 +35,7 @@ Version     Author              Date            Comment
 3.2         Kaique Biancatti    30/11/2022      Added a stopwatch, deleted some junk from the folders
 3.3         Kaique Biancatti    04/01/2024      Added functionality to download and open the SSW Snagit theme.
 3.4         Gordon Beeming      23/02/2024      Removed installing potx file
+3.5         Chris Schultz       09/05/2025      Added inter font install
 
 DO NOT FORGET TO UPDATE THE $ScriptVersion AND $ScriptLastUpdated VARIABLE BELOW
 #>
@@ -245,6 +246,50 @@ else {
     Add-Content -Path $ScriptLogFile -Value "   You don't have Snagit installed. The theme will not be downloaded."
 }
 
+
+Write-Host "Installing Inter font"
+
+# Set font GitHub & download locations
+$interUrl = "https://github.com/google/fonts/raw/main/ofl/inter/Inter%5Bopsz%2Cwght%5D.ttf"
+$interItalicUrl = "https://github.com/google/fonts/raw/main/ofl/inter/Inter-Italic%5Bopsz%2Cwght%5D.ttf"
+$interOutFile = "C:\Temp\fonts\Inter.ttf"
+$interItalicOutFile = "C:\Temp\fonts\Inter-Italic.ttf"
+
+# Create temp folder
+try {
+    New-Item -Path "C:\temp\fonts" -ItemType Directory
+    Add-Content -Path $ScriptLogFile -Value '   Fonts temp folder creation                      [Done]'
+}
+catch {
+    Add-Content -Path $ScriptLogFile -Value '   Could not create Fonts temp folder              [Failed]'
+    Add-ErrorToLog
+}
+
+# Download fonts
+try {
+    Invoke-WebRequest -Uri $interUrl -OutFile $interOutFile
+    Invoke-WebRequest -Uri $interItalicUrl -OutFile $interItalicOutFile
+    Add-Content -Path $ScriptLogFile -Value '   Inter font download                             [Done]'
+}
+catch {
+    Add-Content -Path $ScriptLogFile -Value '   Font download failed                            [Failed]'
+    Add-ErrorToLog 
+}
+
+# Install fonts
+try {
+    $fontsDir = "C:\temp\fonts"
+    $fontsFolder = (New-Object -ComObject Shell.Application).Namespace(0x14)
+    Get-ChildItem -Path $fontsDir -Include *.ttf, *.otf -Recurse | ForEach-Object {
+        $fontsFolder.CopyHere($_.FullName, 0x10)
+    }
+    Add-Content -Path $ScriptLogFile -Value '   Inter font install                             [Done]'
+}
+catch {
+    Add-Content -Path $ScriptLogFile -Value '   Could not install fonts                        [Failed]'
+    Add-ErrorToLog
+}
+
 Add-Content -Path $ScriptLogFile -Value ''
 Add-Content -Path $ScriptLogFile -Value ''
 
@@ -256,7 +301,7 @@ Add-Content -Path $ScriptLogFile -Value "   Last run on your computer: $((Get-Da
 Add-Content -Path $ScriptLogFile -Value "   This script took $($Script:Stopwatch.Elapsed.ToString('mm')) minutes and $($Script:Stopwatch.Elapsed.ToString('ss')) seconds to run"
 Add-Content -Path $ScriptLogFile -Value ''
 Add-Content -Path $ScriptLogFile -Value 'From your friendly SysAdmins'
-Add-Content -Path $ScriptLogFile -Value 'Kiki Biancatti & Warwick Leahy & Chris Schultz & Mehmet Ozdemir & Ash Anil & Lloyd Collins'
+Add-Content -Path $ScriptLogFile -Value 'Kiki Biancatti, Chris Schultz, & Mehmet Ozdemir'
 Add-Content -Path $ScriptLogFile -Value 'https://sswcom.sharepoint.com/sites/SSWSysAdmins'
 
 #Let's stop timing this!
