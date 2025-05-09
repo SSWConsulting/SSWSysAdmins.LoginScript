@@ -89,6 +89,7 @@ Add-Content -Path $ScriptLogFile -Value 'What did this script do?'
 Add-Content -Path $ScriptLogFile -Value '   1. Flushed DNS'
 Add-Content -Path $ScriptLogFile -Value '   2. Copied Office Templates from GitHub to your machine, as per the rule https://rules.ssw.com.au/have-a-companywide-word-template'
 Add-Content -Path $ScriptLogFile -Value '   3. If you have Snagit installed, copied Snagit Template from GitHub to your machine, then opened the SSW.snagtheme so Snagit registers the SSW theme! As per the rule https://www.ssw.com.au/rules/screenshots-add-branding'
+Add-Content -Path $ScriptLogFile -Value '   4. Inter font was installed, as per our branding: https://www.ssw.com.au/company/typography'
 Add-Content -Path $ScriptLogFile -Value ''
 Add-Content -Path $ScriptLogFile -Value '   Please review the success or failure below and errors if any:'
 
